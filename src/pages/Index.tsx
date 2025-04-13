@@ -1,12 +1,13 @@
 
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, Moon, Stars, Sun, MessageCircle, Sparkles } from 'lucide-react';
+import { ChevronRight, Moon, Sun, MessageCircle, Sparkles } from 'lucide-react';
+import { Star } from 'lucide-react'; // Using Star instead of Stars for the tarot card icon
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import Stars from '@/components/Stars';
+import StarsBackground from '@/components/Stars'; // Renamed import to avoid conflict
 import CosmicBackground from '@/components/CosmicBackground';
 import { zodiacSigns } from '@/utils/zodiacData';
 
@@ -28,7 +29,7 @@ const Index = () => {
 
   return (
     <div className="cosmic-bg min-h-screen flex flex-col">
-      <Stars count={150} />
+      <StarsBackground count={150} />
       <CosmicBackground />
       
       <Navbar />
@@ -131,7 +132,7 @@ const Index = () => {
                 <Card className="glass-card h-full hover:shadow-[0_0_20px_rgba(159,68,211,0.4)] transition-all duration-300 overflow-hidden group">
                   <CardContent className="p-6 flex flex-col h-full">
                     <div className="rounded-full bg-astro-purple/20 w-14 h-14 flex items-center justify-center mb-4 group-hover:bg-astro-purple/30 transition-colors duration-300">
-                      <Stars className="h-7 w-7 text-astro-glow" />
+                      <Star className="h-7 w-7 text-astro-glow" />
                     </div>
                     <h3 className="font-unbounded text-xl font-semibold mb-3">Tarot Reading</h3>
                     <p className="text-foreground/70 mb-4 flex-grow">
