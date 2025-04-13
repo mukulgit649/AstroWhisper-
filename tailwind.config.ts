@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -18,12 +19,26 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				'unbounded': ['Unbounded', 'sans-serif'],
+				'cinzel': ['Cinzel', 'serif'],
+				'poppins': ['Poppins', 'sans-serif'],
+				'cormorant': ['"Cormorant Garamond"', 'serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
+				astro: {
+					'dark': '#0b0c1c',
+					'navy': '#131b3a',
+					'purple': '#5f2c82',
+					'violet': '#9f44d3',
+					'lilac': '#bf6ff4',
+					'glow': '#e69dfc',
+				},
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))'
@@ -84,12 +99,56 @@ export default {
 					to: {
 						height: '0'
 					}
-				}
+				},
+				'float': {
+					'0%, 100%': {
+						transform: 'translateY(0)',
+					},
+					'50%': {
+						transform: 'translateY(-10px)',
+					},
+				},
+				'twinkle': {
+					'0%, 100%': {
+						opacity: '0.3',
+					},
+					'50%': {
+						opacity: '1',
+					},
+				},
+				'pulse-glow': {
+					'0%, 100%': {
+						boxShadow: '0 0 15px rgba(159, 68, 211, 0.6)',
+					},
+					'50%': {
+						boxShadow: '0 0 25px rgba(159, 68, 211, 0.9)',
+					},
+				},
+				'rotate-slow': {
+					'from': {
+						transform: 'rotate(0deg)',
+					},
+					'to': {
+						transform: 'rotate(360deg)',
+					},
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
-			}
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'float': 'float 6s ease-in-out infinite',
+				'float-slow': 'float 8s ease-in-out infinite',
+				'float-fast': 'float 4s ease-in-out infinite',
+				'twinkle': 'twinkle 4s ease-in-out infinite',
+				'twinkle-slow': 'twinkle 6s ease-in-out infinite',
+				'twinkle-fast': 'twinkle 2s ease-in-out infinite',
+				'pulse-glow': 'pulse-glow 3s ease-in-out infinite',
+				'rotate-slow': 'rotate-slow 60s linear infinite',
+			},
+			backgroundImage: {
+				'cosmic-gradient': 'linear-gradient(to bottom, #131b3a, #0b0c1c)',
+				'purple-glow': 'linear-gradient(to right, #9f44d3, #5f2c82)',
+			},
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
