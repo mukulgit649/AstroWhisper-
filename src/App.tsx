@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Horoscope from "./pages/Horoscope";
 import Tarot from "./pages/Tarot";
 import AstroBot from "./pages/AstroBot";
+import BirthChart from "./pages/BirthChart";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/horoscope" element={<Horoscope />} />
           <Route path="/tarot" element={<Tarot />} />
           <Route path="/astrobot" element={<AstroBot />} />
+          <Route path="/birthchart" element={<BirthChart />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -1,8 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, Moon, Sun, MessageCircle, Sparkles } from 'lucide-react';
-import { Star } from 'lucide-react'; // Using Star instead of Stars for the tarot card icon
+import { ChevronRight, Moon, Sun, MessageCircle, Sparkles, Star, Map } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Navbar from '@/components/Navbar';
@@ -109,7 +108,7 @@ const Index = () => {
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               <Link to="/horoscope" className={`${isLoaded ? fadeInLoaded : fadeInAnimation}`} style={{ transitionDelay: '0.7s' }}>
                 <Card className="glass-card h-full hover:shadow-[0_0_20px_rgba(159,68,211,0.4)] transition-all duration-300 overflow-hidden group">
                   <CardContent className="p-6 flex flex-col h-full">
@@ -158,6 +157,24 @@ const Index = () => {
                     </p>
                     <div className="flex items-center text-astro-violet group-hover:text-astro-glow transition-colors duration-300">
                       <span className="mr-2 font-medium">Start chatting</span>
+                      <ChevronRight className="h-5 w-5 transform group-hover:translate-x-1 transition-transform duration-300" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+              
+              <Link to="/birthchart" className={`${isLoaded ? fadeInLoaded : fadeInAnimation}`} style={{ transitionDelay: '1s' }}>
+                <Card className="glass-card h-full hover:shadow-[0_0_20px_rgba(159,68,211,0.4)] transition-all duration-300 overflow-hidden group">
+                  <CardContent className="p-6 flex flex-col h-full">
+                    <div className="rounded-full bg-astro-purple/20 w-14 h-14 flex items-center justify-center mb-4 group-hover:bg-astro-purple/30 transition-colors duration-300">
+                      <Map className="h-7 w-7 text-astro-glow" />
+                    </div>
+                    <h3 className="font-unbounded text-xl font-semibold mb-3">Birth Chart</h3>
+                    <p className="text-foreground/70 mb-4 flex-grow">
+                      Generate your complete astrological blueprint based on your exact birth time and location.
+                    </p>
+                    <div className="flex items-center text-astro-violet group-hover:text-astro-glow transition-colors duration-300">
+                      <span className="mr-2 font-medium">Map your stars</span>
                       <ChevronRight className="h-5 w-5 transform group-hover:translate-x-1 transition-transform duration-300" />
                     </div>
                   </CardContent>
