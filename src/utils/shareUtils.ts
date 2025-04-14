@@ -5,20 +5,19 @@ interface ShareData {
   url?: string;
 }
 
-export const shareReading = async (data: ShareData) => {
+export const shareContent = async (data: ShareData) => {
   if (navigator.share) {
     try {
       await navigator.share(data);
-      return { success: true };
+      return { success: true, method: 'native' };
     } catch (error) {
       console.error('Error sharing:', error);
-      return { success: false, error };
     }
   }
   
-  // Fallback to clipboard if Web Share API is not available
+  // Fallback to clipboard
   try {
-    const shareText = `${data.title}\n\n${data.text}\n${data.url || window.location.href}`;
+    const shareText = `${data.title}\n\n${data.text}${data.url ? `\n\n${data.url}` : ''}`;
     await navigator.clipboard.writeText(shareText);
     return { success: true, method: 'clipboard' };
   } catch (error) {
@@ -30,15 +29,24 @@ export const shareReading = async (data: ShareData) => {
 export const saveReading = (readingData: any) => {
   try {
     const savedReadings = JSON.parse(localStorage.getItem('saved_readings') || '[]');
-    savedReadings.push({
+    const newReading = {
       ...readingData,
+      id: Date.now(),
       savedAt: new Date().toISOString()
-    });
+    };
+    savedReadings.push(newReading);
     localStorage.setItem('saved_readings', JSON.stringify(savedReadings));
-    return { success: true };
+    return { success: true, reading: newReading };
   } catch (error) {
     console.error('Error saving reading:', error);
     return { success: false, error };
   }
 };
 
+export const getSavedReadings = () => {
+  try {
+    return JSON.parse(localStorage.getItem('saved_readings') || '[]');
+  } catch {
+    return [];
+  }
+};

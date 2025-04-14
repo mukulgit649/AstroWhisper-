@@ -31,12 +31,13 @@ const BirthChart = () => {
     // This is a simplified calculation for demo purposes
     // In a real app, you would use more complex astronomical calculations
     
+    const birthDate = new Date(date);
     const birthHour = time ? parseInt(time.split(':')[0]) : 12;
     const birthMinute = time ? parseInt(time.split(':')[1]) : 0;
     
     // Calculate sidereal time (simplified)
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
+    const month = birthDate.getMonth() + 1;
+    const day = birthDate.getDate();
     const hourDecimal = birthHour + (birthMinute / 60);
     
     // Use the date to create a consistent but seemingly random result for demo

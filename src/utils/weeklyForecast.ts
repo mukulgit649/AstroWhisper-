@@ -22,6 +22,7 @@ export const getWeeklyForecast = (sign: string) => {
       return char.charCodeAt(0) + ((acc << 5) - acc);
     }, 0);
     
+    // Use zodiac traits to generate more personalized predictions
     const predictions = [
       `A favorable time for ${zodiacData.traits[0].toLowerCase()} endeavors`,
       `Focus on your ${zodiacData.traits[1].toLowerCase()} nature`,
@@ -35,4 +36,3 @@ export const getWeeklyForecast = (sign: string) => {
     };
   });
 };
-

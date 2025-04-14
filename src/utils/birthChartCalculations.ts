@@ -1,3 +1,4 @@
+import { getZodiacData } from './zodiacData';
 
 interface PlanetaryPosition {
   planet: string;
@@ -69,7 +70,7 @@ export const calculateAspects = (positions: PlanetaryPosition[]) => {
           planets: [p1.planet, p2.planet],
           type: matchingAspect.name,
           angle,
-          orb: Math.abs(angle - matchingAspect.angle)
+          orb: Math.abs(angle - aspect.angle)
         });
       }
     }
@@ -85,27 +86,30 @@ export const getPersonalizedReading = (
   positions: PlanetaryPosition[],
   aspects: any[]
 ) => {
+  const sunSignData = getZodiacData(sunSign);
+  const moonSignData = getZodiacData(moonSign);
+  
   let reading = `Your ${sunSign} Sun sign represents your core identity and ego. `;
-  reading += `With a ${moonSign} Moon, your emotional nature is characterized by ${getZodiacData(moonSign)?.traits.join(', ')}. `;
+  reading += `With a ${moonSign} Moon, your emotional nature is characterized by ${moonSignData?.traits.join(', ')}. `;
   
   if (ascendant) {
-    reading += `Your ${ascendant} Ascendant shapes how others perceive you initially. `;
+    const ascendantData = getZodiacData(ascendant);
+    reading += `Your ${ascendant} Ascendant shapes how others perceive you initially. It brings ${ascendantData?.traits.slice(0, 2).join(' and ')} to your outward personality. `;
   }
   
-  // Add planetary positions insight
   const significantPlanets = positions.filter(p => 
     ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars'].includes(p.planet)
   );
   
   significantPlanets.forEach(position => {
+    const planetSignData = getZodiacData(position.sign);
     reading += `Your ${position.planet} in ${position.sign} influences your ${
-      position.planet === 'Mercury' ? 'communication style' :
-      position.planet === 'Venus' ? 'approach to love and beauty' :
-      position.planet === 'Mars' ? 'drive and ambition' :
+      position.planet === 'Mercury' ? 'communication style and thought process' :
+      position.planet === 'Venus' ? 'approach to love, beauty, and relationships' :
+      position.planet === 'Mars' ? 'drive, ambition, and energy expression' :
       'core nature'
-    }. `;
+    }, bringing ${planetSignData?.traits[0].toLowerCase()} qualities. `;
   });
   
   return reading;
 };
-

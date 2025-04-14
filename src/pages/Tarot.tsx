@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Sparkles, RefreshCw, BookOpen, Download, Share2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,8 @@ import { getRandomCard } from '@/utils/tarotData';
 import { getMockTarotReading } from '@/utils/mockAiResponses';
 import type { TarotCard } from '@/utils/tarotData';
 import { useDailyReset } from '@/hooks/useDailyReset';
+import { shareContent, saveReading } from '@/utils/shareUtils';
+import { toast } from "@/components/ui/use-toast";
 
 const Tarot = () => {
   const [cards, setCards] = useState<TarotCard[]>(() => {
@@ -90,6 +91,56 @@ const Tarot = () => {
     // Get new cards
     const newCards = Array(3).fill(null).map(() => getRandomCard());
     setCards(newCards);
+  };
+
+  const handleSaveReading = () => {
+    if (!selectedCard || !reading) return;
+    
+    const result = saveReading({
+      card: selectedCard,
+      reading,
+      date: new Date().toISOString()
+    });
+    
+    if (result.success) {
+      toast({
+        title: "Reading Saved",
+        description: "Your tarot reading has been saved successfully."
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: "Could not save your reading. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleShareReading = async () => {
+    if (!selectedCard || !reading) return;
+    
+    const shareData = {
+      title: `Tarot Reading: ${selectedCard.name}`,
+      text: reading,
+      url: window.location.href
+    };
+    
+    const result = await shareContent(shareData);
+    
+    if (result.success) {
+      toast({
+        title: "Shared Successfully",
+        description: result.method === 'clipboard' 
+          ? "Reading copied to clipboard!" 
+          : "Reading shared successfully!"
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: "Could not share the reading. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const fadeInAnimation = "opacity-0 translate-y-4 transition-all duration-700";
@@ -264,24 +315,30 @@ const Tarot = () => {
                       )}
                     </div>
                     
-                    <div className="mt-6 flex flex-col sm:flex-row gap-3">
-                      <Button onClick={handleReset} className="gap-2">
-                        <RefreshCw className="h-4 w-4" />
-                        Draw New Cards
-                      </Button>
-                      {reading && (
-                        <>
-                          <Button variant="outline" className="border-astro-purple/50 hover:bg-astro-purple/10 gap-2">
-                            <Download className="h-4 w-4" />
-                            Save Reading
-                          </Button>
-                          <Button variant="outline" className="border-astro-purple/50 hover:bg-astro-purple/10 gap-2">
-                            <Share2 className="h-4 w-4" />
-                            Share
-                          </Button>
-                        </>
-                      )}
-                    </div>
+                    {selectedCard && reading && (
+                      <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                        <Button onClick={handleReset} className="gap-2">
+                          <RefreshCw className="h-4 w-4" />
+                          Draw New Cards
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          className="border-astro-purple/50 hover:bg-astro-purple/10 gap-2"
+                          onClick={handleSaveReading}
+                        >
+                          <Download className="h-4 w-4" />
+                          Save Reading
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          className="border-astro-purple/50 hover:bg-astro-purple/10 gap-2"
+                          onClick={handleShareReading}
+                        >
+                          <Share2 className="h-4 w-4" />
+                          Share
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
