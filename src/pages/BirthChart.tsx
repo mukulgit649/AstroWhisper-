@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { zodiacSigns, getZodiacSign, getZodiacData } from '@/utils/zodiacData';
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,6 +9,11 @@ import Footer from '@/components/Footer';
 import Stars from '@/components/Stars';
 import CosmicBackground from '@/components/CosmicBackground';
 import { Search, Clock, MapPin, Moon, Sun, Sparkles } from 'lucide-react';
+import {
+  calculatePlanetaryPositions,
+  calculateAspects,
+  getPersonalizedReading
+} from '@/utils/birthChartCalculations';
 
 const BirthChart = () => {
   const [birthDate, setBirthDate] = useState('');
@@ -84,43 +88,18 @@ const BirthChart = () => {
         const ascendant = birthTime ? calculateAscendant(date, birthTime) : null;
         const ascendantData = ascendant ? getZodiacData(ascendant) : null;
         
-        // Calculate planetary positions (simplified)
-        const planets = [
-          { name: 'Mercury', sign: getZodiacSign((date.getMonth() + 1 + 1) % 12 || 12, (date.getDate() + 7) % 28 || 28), house: Math.floor(Math.random() * 12) + 1 },
-          { name: 'Venus', sign: getZodiacSign((date.getMonth() + 1 + 2) % 12 || 12, (date.getDate() + 11) % 28 || 28), house: Math.floor(Math.random() * 12) + 1 },
-          { name: 'Mars', sign: getZodiacSign((date.getMonth() + 1 + 3) % 12 || 12, (date.getDate() + 15) % 28 || 28), house: Math.floor(Math.random() * 12) + 1 },
-          { name: 'Jupiter', sign: getZodiacSign((date.getMonth() + 1 + 4) % 12 || 12, (date.getDate() + 18) % 28 || 28), house: Math.floor(Math.random() * 12) + 1 },
-          { name: 'Saturn', sign: getZodiacSign((date.getMonth() + 1 + 5) % 12 || 12, (date.getDate() + 21) % 28 || 28), house: Math.floor(Math.random() * 12) + 1 },
-        ];
+        // Calculate planetary positions
+        const positions = calculatePlanetaryPositions(date);
+        const aspects = calculateAspects(positions);
         
-        // Generate aspect data (simplified)
-        const aspects = [
-          { planets: 'Sun-Moon', type: 'Conjunction', influence: 'Strong emotional alignment with life purpose' },
-          { planets: 'Moon-Mercury', type: 'Trine', influence: 'Harmony between emotions and communication' },
-          { planets: 'Venus-Mars', type: 'Square', influence: 'Creative tension in relationships and desires' },
-        ];
-        
-        // Calculate dominant elements and modalities
-        const elements = { fire: 0, earth: 0, air: 0, water: 0 };
-        const modalities = { cardinal: 0, fixed: 0, mutable: 0 };
-        
-        // Count sun sign
-        if (sunSignData) {
-          elements[sunSignData.element.toLowerCase() as keyof typeof elements] += 3;
-        }
-        
-        // Count moon sign
-        if (moonSignData) {
-          elements[moonSignData.element.toLowerCase() as keyof typeof elements] += 2;
-        }
-        
-        // Count ascendant
-        if (ascendantData) {
-          elements[ascendantData.element.toLowerCase() as keyof typeof elements] += 2;
-        }
-        
-        // Find dominant element
-        const dominantElement = Object.entries(elements).reduce((a, b) => a[1] > b[1] ? a : b)[0];
+        // Get personalized reading
+        const reading = getPersonalizedReading(
+          sunSign,
+          moonSign,
+          ascendant,
+          positions,
+          aspects
+        );
         
         setChart({
           sunSign,
@@ -129,9 +108,9 @@ const BirthChart = () => {
           moonSignData,
           ascendant,
           ascendantData,
-          planets,
+          positions,
           aspects,
-          dominantElement,
+          reading,
           birthDate: date.toLocaleDateString(),
           birthTime: birthTime || 'Unknown',
           birthPlace: birthPlace || 'Unknown',
@@ -314,9 +293,9 @@ const BirthChart = () => {
                         <h3 className="font-unbounded text-xl mb-3">Planetary Positions</h3>
                         <div className="bg-white/5 rounded-lg p-4">
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                            {chart.planets.map((planet: any, index: number) => (
+                            {chart.positions.map((planet: any, index: number) => (
                               <div key={index} className="p-3 rounded-md bg-white/5 text-sm">
-                                <div className="font-medium">{planet.name}</div>
+                                <div className="font-medium">{planet.planet}</div>
                                 <div className="flex justify-between mt-1">
                                   <span className="text-foreground/70">Sign:</span>
                                   <span>{planet.sign}</span>
@@ -339,13 +318,13 @@ const BirthChart = () => {
                             <div className="space-y-3">
                               {chart.aspects.map((aspect: any, index: number) => (
                                 <div key={index} className="p-2 rounded-md bg-white/5 text-sm">
-                                  <div className="font-medium">{aspect.planets}</div>
+                                  <div className="font-medium">{aspect.planets[0]} - {aspect.planets[1]}</div>
                                   <div className="flex justify-between mt-1">
                                     <span className="text-foreground/70">Type:</span>
                                     <span>{aspect.type}</span>
                                   </div>
                                   <div className="text-xs text-foreground/80 mt-1">
-                                    {aspect.influence}
+                                    Angle: {aspect.angle.toFixed(2)}°, Orb: {aspect.orb.toFixed(2)}°
                                   </div>
                                 </div>
                               ))}
@@ -357,22 +336,7 @@ const BirthChart = () => {
                           <h3 className="font-unbounded text-xl mb-3">Chart Interpretation</h3>
                           <div className="bg-white/5 rounded-lg p-4 h-full">
                             <p className="text-sm mb-3">
-                              Your chart reveals a dominant {chart.dominantElement} element influence, suggesting that 
-                              {chart.dominantElement === 'fire' && " passion, creativity, and spontaneity are key themes in your life."}
-                              {chart.dominantElement === 'earth' && " practicality, stability, and material focus are key themes in your life."}
-                              {chart.dominantElement === 'air' && " intellect, communication, and social connections are key themes in your life."}
-                              {chart.dominantElement === 'water' && " emotion, intuition, and sensitivity are key themes in your life."}
-                            </p>
-                            <p className="text-sm mb-3">
-                              The combination of your {chart.sunSign} sun and {chart.moonSign} moon creates a personality that 
-                              {chart.sunSignData && chart.moonSignData && chart.sunSignData.element === chart.moonSignData.element 
-                                ? " flows harmoniously as both energies reinforce each other." 
-                                : " balances different elemental energies, creating a dynamic and multifaceted approach to life."}
-                            </p>
-                            <p className="text-sm">
-                              {chart.ascendant 
-                                ? `Your ${chart.ascendant} ascendant shapes how others perceive you, often displaying traits of ${chart.ascendant} in social situations.` 
-                                : "Add your birth time to discover your ascendant sign and complete your cosmic blueprint."}
+                              {chart.reading}
                             </p>
                           </div>
                         </div>

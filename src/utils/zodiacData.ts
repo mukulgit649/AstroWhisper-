@@ -1,4 +1,3 @@
-
 export const zodiacSigns = [
   {
     name: 'Aries',
@@ -225,35 +224,26 @@ export const getZodiacData = (sign: string) => {
   return zodiacSigns.find(zodiac => zodiac.name.toLowerCase() === sign.toLowerCase());
 };
 
-// Function to get daily lucky elements based on date and sign
 export const getDailyLuckyElements = (sign: string) => {
   const zodiacData = getZodiacData(sign);
   if (!zodiacData) return null;
   
   // Use current date to create a "random" but consistent selection for the day
   const today = new Date();
-  const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+  const startOfYear = new Date(today.getFullYear(), 0, 0);
+  const diff = Number(today) - Number(startOfYear);
+  const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
   
-  // Get lucky number (rotate through the available numbers)
+  // Get lucky elements using the day of year
   const luckyNumberIndex = dayOfYear % zodiacData.luckyNumbers.length;
-  const luckyNumber = zodiacData.luckyNumbers[luckyNumberIndex];
-  
-  // Get lucky day (rotate through the available days)
   const luckyDayIndex = dayOfYear % zodiacData.luckyDays.length;
-  const luckyDay = zodiacData.luckyDays[luckyDayIndex];
-  
-  // Get lucky color (use the sign's color or create variations)
-  const luckyColor = zodiacData.color;
-  
-  // Get lucky gem (rotate through the available gems)
   const luckyGemIndex = dayOfYear % zodiacData.luckyGems.length;
-  const luckyGem = zodiacData.luckyGems[luckyGemIndex];
   
   return {
-    number: luckyNumber,
-    day: luckyDay,
-    color: luckyColor,
-    gem: luckyGem,
+    number: zodiacData.luckyNumbers[luckyNumberIndex],
+    day: zodiacData.luckyDays[luckyDayIndex],
+    color: zodiacData.color,
+    gem: zodiacData.luckyGems[luckyGemIndex],
     element: zodiacData.element
   };
 };
