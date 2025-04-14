@@ -6,6 +6,7 @@ import CosmicBackground from '@/components/CosmicBackground';
 import CosmicInsightsSidebar from '@/components/astrobot/CosmicInsightsSidebar';
 import ChatArea from '@/components/astrobot/ChatArea';
 import AstroBotHeader from '@/components/astrobot/AstroBotHeader';
+import Navbar from '@/components/Navbar';
 
 const AstroBotContainer = () => {
   const { messages, isLoading, sendMessage, clearMessages } = useAstroBot();
@@ -35,6 +36,8 @@ const AstroBotContainer = () => {
 
   return (
     <div className="relative z-10 pt-4">
+      <Navbar />
+      
       <AstroBotHeader 
         isLoaded={isLoaded}
         fadeInAnimation={fadeInAnimation}
