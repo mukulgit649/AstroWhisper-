@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Moon, Sun, Calendar, ArrowRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Stars from '@/components/Stars';
 import CosmicBackground from '@/components/CosmicBackground';
-import { zodiacSigns, getZodiacData } from '@/utils/zodiacData';
+import { zodiacSigns, getZodiacData, getDailyLuckyElements } from '@/utils/zodiacData';
 import { getMockHoroscopeReading } from '@/utils/mockAiResponses';
 import { useDailyReset } from '@/hooks/useDailyReset';
 
@@ -19,6 +20,7 @@ const Horoscope = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [luckyElements, setLuckyElements] = useState<any>(null);
 
   const zodiacData = getZodiacData(selectedSign);
   const { shouldReset } = useDailyReset('horoscope');
@@ -27,27 +29,45 @@ const Horoscope = () => {
     setIsLoaded(true);
     if (shouldReset()) {
       setHoroscope('');
+      setLuckyElements(null);
       localStorage.removeItem('daily_horoscope');
+      localStorage.removeItem('daily_lucky_elements');
       toast({
         title: "Daily Horoscope Reset",
         description: "Your horoscope has been reset for a new day.",
       });
+    } else {
+      const savedLuckyElements = localStorage.getItem('daily_lucky_elements');
+      if (savedLuckyElements) {
+        setLuckyElements(JSON.parse(savedLuckyElements));
+      }
     }
   }, []);
 
   useEffect(() => {
     const fetchHoroscope = async () => {
       setIsLoading(true);
+      
+      // Get personalized horoscope reading for the selected sign
       const reading = getMockHoroscopeReading(selectedSign);
       setHoroscope(reading);
       localStorage.setItem('daily_horoscope', JSON.stringify(reading));
+      
+      // Get lucky elements for the day based on the sign
+      const elements = getDailyLuckyElements(selectedSign);
+      setLuckyElements(elements);
+      localStorage.setItem('daily_lucky_elements', JSON.stringify(elements));
+      
       setIsLoading(false);
     };
 
-    if (!horoscope || shouldReset()) {
+    if (!horoscope || !luckyElements || shouldReset()) {
+      fetchHoroscope();
+    } else if (zodiacData && zodiacData.name.toLowerCase() !== selectedSign.toLowerCase()) {
+      // If user changes the sign, fetch new horoscope
       fetchHoroscope();
     }
-  }, [selectedSign, shouldReset]);
+  }, [selectedSign, shouldReset, zodiacData]);
 
   const fadeInAnimation = "opacity-0 translate-y-4 transition-all duration-700";
   const fadeInLoaded = "opacity-100 translate-y-0";
@@ -117,6 +137,10 @@ const Horoscope = () => {
                           </span>
                         ))}
                       </div>
+                    </div>
+                    
+                    <div className="mt-4 text-sm text-foreground/80 leading-relaxed">
+                      <p>{zodiacData.description.substring(0, 120)}...</p>
                     </div>
                   </div>
                 )}
@@ -191,22 +215,29 @@ const Horoscope = () => {
                     <div className="mt-8 p-4 rounded-lg bg-white/5">
                       <h3 className="font-unbounded text-lg mb-3">Lucky Elements Today</h3>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <div className="p-3 rounded-lg bg-white/5 text-center">
-                          <div className="text-xs uppercase tracking-wider text-foreground/50 mb-1">Number</div>
-                          <div className="font-semibold text-astro-glow">7</div>
-                        </div>
-                        <div className="p-3 rounded-lg bg-white/5 text-center">
-                          <div className="text-xs uppercase tracking-wider text-foreground/50 mb-1">Color</div>
-                          <div className="font-semibold text-astro-glow">Purple</div>
-                        </div>
-                        <div className="p-3 rounded-lg bg-white/5 text-center">
-                          <div className="text-xs uppercase tracking-wider text-foreground/50 mb-1">Day</div>
-                          <div className="font-semibold text-astro-glow">Thursday</div>
-                        </div>
-                        <div className="p-3 rounded-lg bg-white/5 text-center">
-                          <div className="text-xs uppercase tracking-wider text-foreground/50 mb-1">Element</div>
-                          <div className="font-semibold text-astro-glow">Water</div>
-                        </div>
+                        {luckyElements && (
+                          <>
+                            <div className="p-3 rounded-lg bg-white/5 text-center">
+                              <div className="text-xs uppercase tracking-wider text-foreground/50 mb-1">Number</div>
+                              <div className="font-semibold text-astro-glow">{luckyElements.number}</div>
+                            </div>
+                            <div className="p-3 rounded-lg bg-white/5 text-center">
+                              <div className="text-xs uppercase tracking-wider text-foreground/50 mb-1">Day</div>
+                              <div className="font-semibold text-astro-glow">{luckyElements.day}</div>
+                            </div>
+                            <div className="p-3 rounded-lg bg-white/5 text-center" style={{ color: luckyElements.color }}>
+                              <div className="text-xs uppercase tracking-wider text-foreground/50 mb-1">Color</div>
+                              <div className="font-semibold">
+                                <span className="inline-block w-3 h-3 rounded-full mr-1" style={{ backgroundColor: luckyElements.color }}></span>
+                                {zodiacData?.name}
+                              </div>
+                            </div>
+                            <div className="p-3 rounded-lg bg-white/5 text-center">
+                              <div className="text-xs uppercase tracking-wider text-foreground/50 mb-1">Element</div>
+                              <div className="font-semibold text-astro-glow">{luckyElements.element}</div>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
                     

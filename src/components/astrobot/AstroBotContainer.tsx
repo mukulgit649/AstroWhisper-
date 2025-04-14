@@ -1,8 +1,6 @@
 
 import { useState, useEffect } from 'react';
 import { useAstroBot } from '@/contexts/AstroBotContext';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import StarsBackground from '@/components/Stars';
 import CosmicBackground from '@/components/CosmicBackground';
 import CosmicInsightsSidebar from '@/components/astrobot/CosmicInsightsSidebar';
@@ -36,47 +34,38 @@ const AstroBotContainer = () => {
   const fadeInLoaded = "opacity-100 translate-y-0";
 
   return (
-    <div className="cosmic-bg min-h-screen flex flex-col">
-      <StarsBackground count={150} />
-      <CosmicBackground />
+    <div className="relative z-10 pt-4">
+      <AstroBotHeader 
+        isLoaded={isLoaded}
+        fadeInAnimation={fadeInAnimation}
+        fadeInLoaded={fadeInLoaded}
+      />
       
-      <Navbar />
-      
-      <main className="flex-grow relative z-10 container mx-auto px-4 py-12">
-        <AstroBotHeader 
-          isLoaded={isLoaded}
-          fadeInAnimation={fadeInAnimation}
-          fadeInLoaded={fadeInLoaded}
-        />
-        
-        <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {/* Sidebar */}
-            <div className="md:col-span-1 order-2 md:order-1">
-              <CosmicInsightsSidebar 
-                isLoaded={isLoaded}
-                fadeInAnimation={fadeInAnimation}
-                fadeInLoaded={fadeInLoaded}
-              />
-            </div>
-            
-            {/* Chat Area */}
-            <ChatArea 
-              messages={messages}
-              isLoading={isLoading}
+      <div className="max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {/* Sidebar */}
+          <div className="md:col-span-1 order-2 md:order-1">
+            <CosmicInsightsSidebar 
               isLoaded={isLoaded}
-              sendMessage={sendMessage}
-              clearMessages={clearMessages}
-              suggestedQuestions={suggestedQuestions}
-              handleSuggestedQuestion={handleSuggestedQuestion}
               fadeInAnimation={fadeInAnimation}
               fadeInLoaded={fadeInLoaded}
             />
           </div>
+          
+          {/* Chat Area */}
+          <ChatArea 
+            messages={messages}
+            isLoading={isLoading}
+            isLoaded={isLoaded}
+            sendMessage={sendMessage}
+            clearMessages={clearMessages}
+            suggestedQuestions={suggestedQuestions}
+            handleSuggestedQuestion={handleSuggestedQuestion}
+            fadeInAnimation={fadeInAnimation}
+            fadeInLoaded={fadeInLoaded}
+          />
         </div>
-      </main>
-      
-      <Footer />
+      </div>
     </div>
   );
 };

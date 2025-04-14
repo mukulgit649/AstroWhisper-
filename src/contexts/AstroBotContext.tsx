@@ -1,6 +1,8 @@
 
 import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { getMockBotResponse } from '@/utils/mockAiResponses';
+import { getZodiacSign, getZodiacData } from '@/utils/zodiacData';
+import { getCardByName } from '@/utils/tarotData';
 
 export interface Message {
   id: string;
@@ -16,6 +18,13 @@ interface AstroBotContextType {
   clearMessages: () => void;
 }
 
+interface UserProfile {
+  name?: string;
+  zodiacSign?: string;
+  interests?: string[];
+  birthDate?: Date;
+}
+
 const AstroBotContext = createContext<AstroBotContextType | undefined>(undefined);
 
 export const AstroBotProvider = ({ children }: { children: ReactNode }) => {
@@ -23,11 +32,12 @@ export const AstroBotProvider = ({ children }: { children: ReactNode }) => {
     {
       id: '1',
       role: 'assistant',
-      content: "Greetings, cosmic traveler! I am AstroBot, your mystical guide to the celestial wisdom. Ask me about astrology, tarot, life's challenges, or spiritual guidance. How may I illuminate your path today?",
+      content: "Greetings, cosmic traveler! I am AstroBot, your mystical guide to celestial wisdom. Ask me about astrology, tarot, life's challenges, or spiritual guidance. How may I illuminate your path today?",
       timestamp: new Date(),
     },
   ]);
   const [isLoading, setIsLoading] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile>({});
 
   // Load messages from localStorage on initial load
   useEffect(() => {
@@ -45,6 +55,20 @@ export const AstroBotProvider = ({ children }: { children: ReactNode }) => {
         console.error('Failed to parse saved messages:', err);
       }
     }
+    
+    // Load user profile from localStorage
+    const savedProfile = localStorage.getItem('astrobot-user-profile');
+    if (savedProfile) {
+      try {
+        const parsedProfile = JSON.parse(savedProfile);
+        if (parsedProfile.birthDate) {
+          parsedProfile.birthDate = new Date(parsedProfile.birthDate);
+        }
+        setUserProfile(parsedProfile);
+      } catch (err) {
+        console.error('Failed to parse saved user profile:', err);
+      }
+    }
   }, []);
 
   // Save messages to localStorage when they change
@@ -53,6 +77,87 @@ export const AstroBotProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem('astrobot-messages', JSON.stringify(messages));
     }
   }, [messages]);
+  
+  // Save user profile to localStorage when it changes
+  useEffect(() => {
+    if (Object.keys(userProfile).length > 0) {
+      localStorage.setItem('astrobot-user-profile', JSON.stringify(userProfile));
+    }
+  }, [userProfile]);
+
+  const extractUserInfo = (content: string) => {
+    // Extract name
+    const nameMatch = content.match(/my name is ([A-Za-z]+)/i) || content.match(/I am ([A-Za-z]+)/i) || content.match(/I'm ([A-Za-z]+)/i);
+    if (nameMatch && nameMatch[1]) {
+      setUserProfile(prev => ({ ...prev, name: nameMatch[1] }));
+    }
+    
+    // Extract birth date
+    const dateMatch = content.match(/born on ([0-9]{1,2}[\/-][0-9]{1,2}[\/-][0-9]{2,4})/i) || 
+                      content.match(/birthday is ([0-9]{1,2}[\/-][0-9]{1,2}[\/-][0-9]{2,4})/i) ||
+                      content.match(/([0-9]{1,2}[\/-][0-9]{1,2}[\/-][0-9]{2,4})/i);
+    
+    if (dateMatch && dateMatch[1]) {
+      const dateStr = dateMatch[1];
+      try {
+        const birthDate = new Date(dateStr);
+        if (!isNaN(birthDate.getTime())) {
+          const zodiacSign = getZodiacSign(birthDate.getMonth() + 1, birthDate.getDate());
+          setUserProfile(prev => ({ 
+            ...prev, 
+            birthDate,
+            zodiacSign
+          }));
+        }
+      } catch (err) {
+        console.error('Error parsing date:', err);
+      }
+    }
+    
+    // Extract zodiac sign
+    const zodiacMatch = content.match(/I(?:'m| am) an? ([A-Za-z]+)(?: sign)?/i) || 
+                       content.match(/my sign is ([A-Za-z]+)/i) ||
+                       content.match(/my zodiac is ([A-Za-z]+)/i);
+    
+    if (zodiacMatch && zodiacMatch[1]) {
+      const potentialSign = zodiacMatch[1].toLowerCase();
+      const zodiacSigns = ['aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo', 
+                          'libra', 'scorpio', 'sagittarius', 'capricorn', 'aquarius', 'pisces'];
+      
+      if (zodiacSigns.includes(potentialSign)) {
+        setUserProfile(prev => ({ ...prev, zodiacSign: potentialSign }));
+      }
+    }
+    
+    // Extract interests
+    const interestMatches = [
+      content.match(/interested in ([A-Za-z, ]+)/i),
+      content.match(/I like ([A-Za-z, ]+)/i),
+      content.match(/I love ([A-Za-z, ]+)/i),
+      content.match(/passion for ([A-Za-z, ]+)/i)
+    ].filter(Boolean);
+    
+    if (interestMatches.length > 0) {
+      const newInterests: string[] = [];
+      
+      interestMatches.forEach(match => {
+        if (match && match[1]) {
+          const interests = match[1].split(/,| and | or /).map(i => i.trim()).filter(Boolean);
+          newInterests.push(...interests);
+        }
+      });
+      
+      if (newInterests.length > 0) {
+        setUserProfile(prev => {
+          const existingInterests = prev.interests || [];
+          return {
+            ...prev,
+            interests: [...new Set([...existingInterests, ...newInterests])]
+          };
+        });
+      }
+    }
+  };
 
   const sendMessage = async (content: string) => {
     if (!content.trim()) return;
@@ -68,12 +173,15 @@ export const AstroBotProvider = ({ children }: { children: ReactNode }) => {
     setMessages(prev => [...prev, userMessage]);
     setIsLoading(true);
     
+    // Extract user information from the message
+    extractUserInfo(content);
+    
     try {
       // Analyze user message to determine topic
       const topic = analyzeMessageTopic(content);
       
       // Get response with context awareness
-      const responseContent = await getContextAwareBotResponse(content, messages, topic);
+      const responseContent = await getContextAwareBotResponse(content, messages, topic, userProfile);
       
       // Add bot response
       const botMessage: Message = {
@@ -132,28 +240,32 @@ export const useAstroBot = () => {
 const analyzeMessageTopic = (message: string): string => {
   const lowerMessage = message.toLowerCase();
   
-  if (lowerMessage.includes('horoscope') || lowerMessage.includes('zodiac') || lowerMessage.includes('birth chart') || lowerMessage.includes('natal chart')) {
+  if (lowerMessage.includes('horoscope') || lowerMessage.includes('zodiac') || lowerMessage.includes('birth chart') || lowerMessage.includes('natal chart') || lowerMessage.includes('astrology') || lowerMessage.includes('planet') || lowerMessage.includes('star sign')) {
     return 'astrology';
   }
   
-  if (lowerMessage.includes('tarot') || lowerMessage.includes('card') || lowerMessage.includes('reading')) {
+  if (lowerMessage.includes('tarot') || lowerMessage.includes('card reading') || lowerMessage.includes('fortune') || lowerMessage.includes('divination')) {
     return 'tarot';
   }
   
-  if (lowerMessage.includes('love') || lowerMessage.includes('relationship') || lowerMessage.includes('partner') || lowerMessage.includes('marriage')) {
+  if (lowerMessage.includes('love') || lowerMessage.includes('relationship') || lowerMessage.includes('partner') || lowerMessage.includes('marriage') || lowerMessage.includes('dating') || lowerMessage.includes('breakup')) {
     return 'love';
   }
   
-  if (lowerMessage.includes('career') || lowerMessage.includes('job') || lowerMessage.includes('work') || lowerMessage.includes('profession')) {
+  if (lowerMessage.includes('career') || lowerMessage.includes('job') || lowerMessage.includes('work') || lowerMessage.includes('profession') || lowerMessage.includes('business')) {
     return 'career';
   }
   
-  if (lowerMessage.includes('money') || lowerMessage.includes('finance') || lowerMessage.includes('wealth') || lowerMessage.includes('investment')) {
+  if (lowerMessage.includes('money') || lowerMessage.includes('finance') || lowerMessage.includes('wealth') || lowerMessage.includes('investment') || lowerMessage.includes('financial')) {
     return 'finance';
   }
   
-  if (lowerMessage.includes('health') || lowerMessage.includes('wellness') || lowerMessage.includes('healing')) {
+  if (lowerMessage.includes('health') || lowerMessage.includes('wellness') || lowerMessage.includes('healing') || lowerMessage.includes('medical') || lowerMessage.includes('exercise')) {
     return 'health';
+  }
+  
+  if (lowerMessage.includes('meditation') || lowerMessage.includes('spirit') || lowerMessage.includes('chakra') || lowerMessage.includes('energy') || lowerMessage.includes('soul') || lowerMessage.includes('aura')) {
+    return 'spirituality';
   }
   
   return 'general';
@@ -163,83 +275,87 @@ const analyzeMessageTopic = (message: string): string => {
 const getContextAwareBotResponse = async (
   message: string, 
   previousMessages: Message[],
-  topic: string
+  topic: string,
+  userProfile: UserProfile
 ): Promise<string> => {
   // Simulate AI processing delay
   await new Promise(resolve => setTimeout(resolve, 1000));
   
-  // Extract some context from the conversation history
-  const userMessages = previousMessages
-    .filter(msg => msg.role === 'user')
-    .slice(-3) // Get the last 3 user messages for context
-    .map(msg => msg.content);
+  // Add personalization based on user profile
+  const personalizedGreeting = userProfile.name ? `${userProfile.name}, ` : '';
   
-  const conversationContext = userMessages.length > 1 
-    ? "Based on your recent questions about " + userMessages.join(", ") + ", "
-    : "";
-  
-  // Get the base response
+  // Get the base response for the topic
   let response = getMockBotResponse(message);
+  let personalized = false;
   
-  // Personalize the response with the user's name if available
-  if (message.toLowerCase().includes('my name is')) {
-    const nameMatch = message.match(/my name is (\w+)/i);
-    if (nameMatch && nameMatch[1]) {
-      const name = nameMatch[1];
-      response = `Thank you for sharing your name, ${name}. ${response}`;
+  // Special handling for specific query types
+  if (topic === 'astrology' && userProfile.zodiacSign) {
+    const zodiacData = getZodiacData(userProfile.zodiacSign);
+    if (zodiacData) {
+      if (message.toLowerCase().includes('compatibility') || message.toLowerCase().includes('compatible')) {
+        response = `${personalizedGreeting}as a ${zodiacData.name}, you are most compatible with ${zodiacData.compatibility.join(', ')}. ${zodiacData.compatibility[0]} and ${zodiacData.compatibility[1]} signs especially complement your ${zodiacData.element} energy, creating balanced and harmonious connections.`;
+        personalized = true;
+      } else if (message.toLowerCase().includes('strength') || message.toLowerCase().includes('weakness')) {
+        response = `${personalizedGreeting}your ${zodiacData.name} strengths include being ${zodiacData.strengths.join(', ')}. However, you may need to be mindful of tendencies toward being ${zodiacData.weaknesses.join(', ')}. Balancing these energies is key to your personal growth.`;
+        personalized = true;
+      } else if (message.toLowerCase().includes('element') || message.toLowerCase().includes('planet')) {
+        response = `${personalizedGreeting}your sign ${zodiacData.name} is a ${zodiacData.element} sign ruled by ${zodiacData.ruling_planet}. This gives you a special connection to ${zodiacData.element.toLowerCase()} energy, which manifests in your ${zodiacData.strengths[0].toLowerCase()} and ${zodiacData.strengths[1].toLowerCase()} nature.`;
+        personalized = true;
+      } else if (!personalized && (message.toLowerCase().includes('tell me about') || message.toLowerCase().includes('what does') || message.toLowerCase().includes('describe'))) {
+        response = `${personalizedGreeting}as a ${zodiacData.name}, ${zodiacData.description} Your ruling planet is ${zodiacData.ruling_planet}, and your element is ${zodiacData.element}.`;
+        personalized = true;
+      }
     }
   }
   
-  // Add topic-specific enhancements
-  if (topic === 'astrology' && message.toLowerCase().includes('sign')) {
-    // Try to extract zodiac sign from the message
-    const signs = ['aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo', 'libra', 'scorpio', 'sagittarius', 'capricorn', 'aquarius', 'pisces'];
-    const mentionedSign = signs.find(sign => message.toLowerCase().includes(sign));
-    
-    if (mentionedSign) {
-      response += `\n\nAs a ${mentionedSign.charAt(0).toUpperCase() + mentionedSign.slice(1)}, you're particularly influenced by the cosmic energies of ${getSignRuler(mentionedSign)}. This gives you a special connection to ${getSignElement(mentionedSign)} energy.`;
+  if (topic === 'tarot') {
+    const cardMatch = message.match(/(?:card|about|meaning of|interpret) (?:the )?([\w\s]+)(?:card)?/i);
+    if (cardMatch && cardMatch[1]) {
+      const cardName = cardMatch[1].trim();
+      const card = getCardByName(cardName);
+      
+      if (card) {
+        response = `${personalizedGreeting}The ${card.name} card (${card.arcana} arcana) represents ${card.keywords.join(', ')}. ${card.description} When upright, it suggests ${card.upright.join(', ')}. When reversed, it can indicate ${card.reversed.join(', ')}.`;
+        personalized = true;
+      }
+    } else if (message.toLowerCase().includes('reading') || message.toLowerCase().includes('draw a card') || message.toLowerCase().includes('pull a card')) {
+      // Simple one-card drawing simulation
+      const randomIndex = Math.floor(Math.random() * 78) % 10; // Using only 10 cards we have
+      const randomCard = randomIndex < 5 ? randomIndex : 9 - randomIndex; // Maps 0-9 to 0-4,5-9
+      
+      const card = getCardByName(['The Fool', 'The Magician', 'The High Priestess', 'The Empress', 'The Emperor', 'The Star', 'The Moon', 'The Sun', 'Death', 'The Tower'][randomCard]);
+      
+      if (card) {
+        const isReversed = Math.random() > 0.7; // 30% chance of reversed
+        const position = isReversed ? 'reversed' : 'upright';
+        const meanings = isReversed ? card.reversed : card.upright;
+        
+        response = `${personalizedGreeting}I've drawn ${card.name} (${position}) for you. This ${card.arcana} arcana card represents ${card.keywords.join(', ')}. In the ${position} position, it suggests ${meanings.join(', ')}. ${card.description} Consider how this energy might be manifesting in your life right now.`;
+        personalized = true;
+      }
     }
+  }
+  
+  // Special handling for love questions if we know the person's sign
+  if (topic === 'love' && userProfile.zodiacSign) {
+    const zodiacData = getZodiacData(userProfile.zodiacSign);
+    if (zodiacData) {
+      response = `${personalizedGreeting}in matters of the heart, your ${zodiacData.name} energy gives you a ${zodiacData.traits[0].toLowerCase()} and ${zodiacData.traits[1].toLowerCase()} approach to relationships. With ${zodiacData.ruling_planet} as your ruling planet, you tend to express love through ${zodiacData.element.toLowerCase()} qualities. Currently, the cosmos suggests focusing on authentic connections that honor your need for ${zodiacData.strengths[2].toLowerCase()}.`;
+      personalized = true;
+    }
+  }
+  
+  // General personalization if no specific handling was triggered
+  if (!personalized && userProfile.name) {
+    response = `${personalizedGreeting}${response}`;
+  }
+  
+  // Use interests to personalize advice if appropriate
+  if (userProfile.interests && userProfile.interests.length > 0 && 
+    (topic === 'career' || topic === 'spirituality' || message.toLowerCase().includes('advice') || message.toLowerCase().includes('recommendation'))) {
+    const relevantInterests = userProfile.interests.slice(0, 2).join(' and ');
+    response += ` I notice your interest in ${relevantInterests} could provide unique insights on this journey.`;
   }
   
   return response;
-};
-
-// Helper function to get planetary ruler for a zodiac sign
-const getSignRuler = (sign: string): string => {
-  const rulers: Record<string, string> = {
-    'aries': 'Mars',
-    'taurus': 'Venus',
-    'gemini': 'Mercury',
-    'cancer': 'the Moon',
-    'leo': 'the Sun',
-    'virgo': 'Mercury',
-    'libra': 'Venus',
-    'scorpio': 'Pluto and Mars',
-    'sagittarius': 'Jupiter',
-    'capricorn': 'Saturn',
-    'aquarius': 'Uranus and Saturn',
-    'pisces': 'Neptune and Jupiter'
-  };
-  
-  return rulers[sign] || 'the planets';
-};
-
-// Helper function to get element for a zodiac sign
-const getSignElement = (sign: string): string => {
-  const elements: Record<string, string> = {
-    'aries': 'fire',
-    'taurus': 'earth',
-    'gemini': 'air',
-    'cancer': 'water',
-    'leo': 'fire',
-    'virgo': 'earth',
-    'libra': 'air',
-    'scorpio': 'water',
-    'sagittarius': 'fire',
-    'capricorn': 'earth',
-    'aquarius': 'air',
-    'pisces': 'water'
-  };
-  
-  return elements[sign] || 'universal';
 };
