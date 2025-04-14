@@ -45,7 +45,7 @@ export const zodiacSigns = [
     icon: '/assets/icons/gemini.svg',
     luckyNumbers: [3, 5, 14, 23],
     luckyDays: ['Wednesday', 'Friday'],
-    luckyGems: ['Tiger's Eye', 'Citrine', 'Chrysoprase'],
+    luckyGems: ["Tiger's Eye", 'Citrine', 'Chrysoprase'],
     description: "Gemini is an air sign represented by the twins, a symbol of duality. Expressive and quick-witted, Gemini represents two different personalities in one and you'll never be sure which one you'll face. They are sociable, communicative and ready for fun, with a tendency to suddenly get serious, thoughtful and restless.",
     compatibility: ['Libra', 'Aquarius', 'Aries', 'Leo'],
     strengths: ['Gentle', 'Affectionate', 'Curious', 'Adaptable', 'Quick learner'],
