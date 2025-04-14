@@ -1,42 +1,53 @@
-
 import { useState, useEffect } from 'react';
 import { Moon, Sun, Calendar, ArrowRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { toast } from "@/components/ui/use-toast";
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Stars from '@/components/Stars';
 import CosmicBackground from '@/components/CosmicBackground';
 import { zodiacSigns, getZodiacData } from '@/utils/zodiacData';
 import { getMockHoroscopeReading } from '@/utils/mockAiResponses';
+import { useDailyReset } from '@/hooks/useDailyReset';
 
 const Horoscope = () => {
   const [selectedSign, setSelectedSign] = useState('aries');
-  const [horoscope, setHoroscope] = useState('');
+  const [horoscope, setHoroscope] = useState(() => {
+    const saved = localStorage.getItem('daily_horoscope');
+    return saved ? JSON.parse(saved) : '';
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
   const zodiacData = getZodiacData(selectedSign);
+  const { shouldReset } = useDailyReset('horoscope');
 
   useEffect(() => {
     setIsLoaded(true);
+    if (shouldReset()) {
+      setHoroscope('');
+      localStorage.removeItem('daily_horoscope');
+      toast({
+        title: "Daily Horoscope Reset",
+        description: "Your horoscope has been reset for a new day.",
+      });
+    }
   }, []);
 
   useEffect(() => {
     const fetchHoroscope = async () => {
       setIsLoading(true);
-      
-      // In a real app, you would fetch this from an API
-      // Simulating API call with timeout
-      setTimeout(() => {
-        const reading = getMockHoroscopeReading(selectedSign);
-        setHoroscope(reading);
-        setIsLoading(false);
-      }, 1000);
+      const reading = getMockHoroscopeReading(selectedSign);
+      setHoroscope(reading);
+      localStorage.setItem('daily_horoscope', JSON.stringify(reading));
+      setIsLoading(false);
     };
 
-    fetchHoroscope();
-  }, [selectedSign]);
+    if (!horoscope || shouldReset()) {
+      fetchHoroscope();
+    }
+  }, [selectedSign, shouldReset]);
 
   const fadeInAnimation = "opacity-0 translate-y-4 transition-all duration-700";
   const fadeInLoaded = "opacity-100 translate-y-0";

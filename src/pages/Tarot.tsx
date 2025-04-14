@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Sparkles, RefreshCw, BookOpen, Download, Share2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { toast } from "@/components/ui/use-toast";
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Stars from '@/components/Stars';
@@ -10,22 +11,45 @@ import CosmicBackground from '@/components/CosmicBackground';
 import { getRandomCard } from '@/utils/tarotData';
 import { getMockTarotReading } from '@/utils/mockAiResponses';
 import type { TarotCard } from '@/utils/tarotData';
+import { useDailyReset } from '@/hooks/useDailyReset';
 
 const Tarot = () => {
-  const [cards, setCards] = useState<TarotCard[]>([]);
-  const [selectedCard, setSelectedCard] = useState<TarotCard | null>(null);
-  const [reading, setReading] = useState('');
+  const [cards, setCards] = useState<TarotCard[]>(() => {
+    const saved = localStorage.getItem('daily_tarot_cards');
+    return saved ? JSON.parse(saved) : Array(3).fill(null).map(() => getRandomCard());
+  });
+  const [selectedCard, setSelectedCard] = useState<TarotCard | null>(() => {
+    const saved = localStorage.getItem('daily_tarot_selected');
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [reading, setReading] = useState(() => {
+    const saved = localStorage.getItem('daily_tarot_reading');
+    return saved ? JSON.parse(saved) : '';
+  });
   const [isDrawing, setIsDrawing] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
   const [isReading, setIsReading] = useState(false);
 
+  const { shouldReset } = useDailyReset('tarot');
+
   useEffect(() => {
     setIsLoaded(true);
-    
-    // Initialize deck with 3 random cards back side up
-    const initialCards = Array(3).fill(null).map(() => getRandomCard());
-    setCards(initialCards);
+    if (shouldReset()) {
+      // Reset daily draw
+      const newCards = Array(3).fill(null).map(() => getRandomCard());
+      setCards(newCards);
+      setSelectedCard(null);
+      setReading('');
+      setIsFlipped(false);
+      localStorage.setItem('daily_tarot_cards', JSON.stringify(newCards));
+      localStorage.removeItem('daily_tarot_selected');
+      localStorage.removeItem('daily_tarot_reading');
+      toast({
+        title: "Daily Tarot Reset",
+        description: "Your tarot cards have been reset for a new day.",
+      });
+    }
   }, []);
 
   const handleDrawCard = (card: TarotCard) => {
@@ -33,21 +57,20 @@ const Tarot = () => {
     
     setIsDrawing(true);
     setSelectedCard(card);
+    localStorage.setItem('daily_tarot_selected', JSON.stringify(card));
     
-    // Simulate card flip animation
     setTimeout(() => {
       setIsFlipped(true);
     }, 500);
     
-    // Simulate AI generating reading with a delay
     setTimeout(() => {
       setIsReading(true);
       const cardReading = getMockTarotReading(card.name);
       
-      // Simulate typing effect
       let i = 0;
       const typingInterval = setInterval(() => {
         setReading(cardReading.substring(0, i));
+        localStorage.setItem('daily_tarot_reading', JSON.stringify(cardReading.substring(0, i)));
         i++;
         if (i > cardReading.length) {
           clearInterval(typingInterval);
