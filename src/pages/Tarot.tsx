@@ -12,7 +12,6 @@ import { getMockTarotReading } from '@/utils/mockAiResponses';
 import type { TarotCard } from '@/utils/tarotData';
 import { useDailyReset } from '@/hooks/useDailyReset';
 import { shareContent, saveReading } from '@/utils/shareUtils';
-import { toast } from "@/components/ui/use-toast";
 
 const Tarot = () => {
   const [cards, setCards] = useState<TarotCard[]>(() => {

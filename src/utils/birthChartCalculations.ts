@@ -1,76 +1,81 @@
-import { getZodiacData } from './zodiacData';
-
-interface PlanetaryPosition {
+interface PlanetPosition {
   planet: string;
   sign: string;
-  house: number;
   degree: number;
+  house: number;
 }
 
-export const calculatePlanetaryPositions = (birthDate: Date): PlanetaryPosition[] => {
-  // Enhanced calculation using birth date to generate more accurate positions
-  const dayOfYear = Math.floor((birthDate.getTime() - new Date(birthDate.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
-  
-  const planets = [
-    "Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", 
-    "Uranus", "Neptune", "Pluto"
-  ];
-  
-  return planets.map((planet, index) => {
-    // Using more sophisticated calculations based on birth date
-    const baseAngle = (dayOfYear * (360 / 365) + index * 30) % 360;
-    const zodiacIndex = Math.floor(baseAngle / 30);
-    const degree = baseAngle % 30;
-    
-    const signs = [
-      "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
-      "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
-    ];
-    
-    return {
-      planet,
-      sign: signs[zodiacIndex],
-      house: (zodiacIndex % 12) + 1,
-      degree: Math.round(degree)
-    };
-  });
-};
+interface Aspect {
+  planet1: string;
+  planet2: string;
+  aspectType: string;
+  orb: number;
+  influence: 'harmonious' | 'challenging' | 'neutral';
+}
 
-export const calculateAspects = (positions: PlanetaryPosition[]) => {
-  const aspects: Array<{
-    planets: [string, string];
-    type: string;
-    angle: number;
-    orb: number;
-  }> = [];
-
-  for (let i = 0; i < positions.length; i++) {
-    for (let j = i + 1; j < positions.length; j++) {
-      const p1 = positions[i];
-      const p2 = positions[j];
+export const calculateAspects = (planetPositions: PlanetPosition[]): Aspect[] => {
+  const aspects: Aspect[] = [];
+  
+  for (let i = 0; i < planetPositions.length; i++) {
+    for (let j = i + 1; j < planetPositions.length; j++) {
+      const planet1 = planetPositions[i];
+      const planet2 = planetPositions[j];
       
-      // Calculate angle between planets
-      const angle = Math.abs(p1.degree - p2.degree);
+      // Calculate the angle between planets
+      const angle = Math.abs(planet1.degree - planet2.degree);
       
-      // Define aspect types and their orbs
-      const aspectTypes = [
-        { name: 'Conjunction', angle: 0, orb: 10 },
-        { name: 'Sextile', angle: 60, orb: 6 },
-        { name: 'Square', angle: 90, orb: 8 },
-        { name: 'Trine', angle: 120, orb: 8 },
-        { name: 'Opposition', angle: 180, orb: 10 }
-      ];
-      
-      const matchingAspect = aspectTypes.find(aspect => 
-        Math.abs(angle - aspect.angle) <= aspect.orb
-      );
-      
-      if (matchingAspect) {
+      // Check for conjunction (0°)
+      if (angle <= 10 || angle >= 350) {
         aspects.push({
-          planets: [p1.planet, p2.planet],
-          type: matchingAspect.name,
-          angle,
-          orb: Math.abs(angle - aspect.angle)
+          planet1: planet1.planet,
+          planet2: planet2.planet,
+          aspectType: 'Conjunction',
+          orb: angle <= 10 ? angle : 360 - angle,
+          influence: 'neutral'
+        });
+      }
+      
+      // Check for opposition (180°)
+      else if (angle >= 170 && angle <= 190) {
+        aspects.push({
+          planet1: planet1.planet,
+          planet2: planet2.planet,
+          aspectType: 'Opposition',
+          orb: Math.abs(180 - angle),
+          influence: 'challenging'
+        });
+      }
+      
+      // Check for trine (120°)
+      else if ((angle >= 110 && angle <= 130) || (angle >= 230 && angle <= 250)) {
+        aspects.push({
+          planet1: planet1.planet,
+          planet2: planet2.planet,
+          aspectType: 'Trine',
+          orb: Math.abs(120 - (angle % 120)),
+          influence: 'harmonious'
+        });
+      }
+      
+      // Check for square (90°)
+      else if ((angle >= 80 && angle <= 100) || (angle >= 260 && angle <= 280)) {
+        aspects.push({
+          planet1: planet1.planet,
+          planet2: planet2.planet,
+          aspectType: 'Square',
+          orb: Math.abs(90 - (angle % 90)),
+          influence: 'challenging'
+        });
+      }
+      
+      // Check for sextile (60°)
+      else if ((angle >= 50 && angle <= 70) || (angle >= 290 && angle <= 310)) {
+        aspects.push({
+          planet1: planet1.planet,
+          planet2: planet2.planet,
+          aspectType: 'Sextile',
+          orb: Math.abs(60 - (angle % 60)),
+          influence: 'harmonious'
         });
       }
     }
@@ -79,37 +84,48 @@ export const calculateAspects = (positions: PlanetaryPosition[]) => {
   return aspects;
 };
 
-export const getPersonalizedReading = (
-  sunSign: string,
-  moonSign: string,
-  ascendant: string | null,
-  positions: PlanetaryPosition[],
-  aspects: any[]
-) => {
-  const sunSignData = getZodiacData(sunSign);
-  const moonSignData = getZodiacData(moonSign);
+export const calculateHouses = (birthTime: Date, latitude: number, longitude: number): number[] => {
+  // Placeholder for actual astronomical calculations
+  // In a real app, you would use a proper astronomical library
   
-  let reading = `Your ${sunSign} Sun sign represents your core identity and ego. `;
-  reading += `With a ${moonSign} Moon, your emotional nature is characterized by ${moonSignData?.traits.join(', ')}. `;
-  
-  if (ascendant) {
-    const ascendantData = getZodiacData(ascendant);
-    reading += `Your ${ascendant} Ascendant shapes how others perceive you initially. It brings ${ascendantData?.traits.slice(0, 2).join(' and ')} to your outward personality. `;
-  }
-  
-  const significantPlanets = positions.filter(p => 
-    ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars'].includes(p.planet)
-  );
-  
-  significantPlanets.forEach(position => {
-    const planetSignData = getZodiacData(position.sign);
-    reading += `Your ${position.planet} in ${position.sign} influences your ${
-      position.planet === 'Mercury' ? 'communication style and thought process' :
-      position.planet === 'Venus' ? 'approach to love, beauty, and relationships' :
-      position.planet === 'Mars' ? 'drive, ambition, and energy expression' :
-      'core nature'
-    }, bringing ${planetSignData?.traits[0].toLowerCase()} qualities. `;
+  // This is a simplified placeholder that returns 12 random house cusps
+  return Array(12).fill(0).map((_, i) => {
+    // Generate a value between 0-360 for each house cusp
+    return (i * 30 + Math.random() * 10 - 5) % 360;
   });
+};
+
+export const interpretAspect = (aspect: Aspect): string => {
+  const { planet1, planet2, aspectType, influence } = aspect;
   
-  return reading;
+  const interpretations: Record<string, Record<string, string>> = {
+    Conjunction: {
+      harmonious: `The conjunction between ${planet1} and ${planet2} brings a powerful fusion of energies, enhancing your ${planet1.toLowerCase()} qualities with ${planet2.toLowerCase()} influences.`,
+      challenging: `The conjunction between ${planet1} and ${planet2} creates intensity and potential tension between your ${planet1.toLowerCase()} expression and ${planet2.toLowerCase()} needs.`,
+      neutral: `The conjunction between ${planet1} and ${planet2} merges these planetary energies, requiring conscious integration of ${planet1.toLowerCase()} and ${planet2.toLowerCase()} qualities.`
+    },
+    Opposition: {
+      harmonious: `The opposition between ${planet1} and ${planet2} creates a dynamic tension that can lead to growth through balancing ${planet1.toLowerCase()} and ${planet2.toLowerCase()} energies.`,
+      challenging: `The opposition between ${planet1} and ${planet2} may manifest as conflict between your ${planet1.toLowerCase()} needs and ${planet2.toLowerCase()} expression.`,
+      neutral: `The opposition between ${planet1} and ${planet2} highlights polarities in your life between ${planet1.toLowerCase()} and ${planet2.toLowerCase()} areas.`
+    },
+    Trine: {
+      harmonious: `The trine between ${planet1} and ${planet2} creates a harmonious flow of energy, allowing your ${planet1.toLowerCase()} qualities to enhance your ${planet2.toLowerCase()} expression.`,
+      challenging: `Despite the typically harmonious nature of trines, this aspect between ${planet1} and ${planet2} may lead to complacency in ${planet1.toLowerCase()} and ${planet2.toLowerCase()} areas.`,
+      neutral: `The trine between ${planet1} and ${planet2} offers natural talents and ease between your ${planet1.toLowerCase()} and ${planet2.toLowerCase()} expressions.`
+    },
+    Square: {
+      harmonious: `While squares are typically challenging, this aspect between ${planet1} and ${planet2} can motivate growth through resolving tension between ${planet1.toLowerCase()} and ${planet2.toLowerCase()} areas.`,
+      challenging: `The square between ${planet1} and ${planet2} creates friction and challenges between your ${planet1.toLowerCase()} expression and ${planet2.toLowerCase()} needs.`,
+      neutral: `The square between ${planet1} and ${planet2} presents growth opportunities through working with the tension between ${planet1.toLowerCase()} and ${planet2.toLowerCase()} energies.`
+    },
+    Sextile: {
+      harmonious: `The sextile between ${planet1} and ${planet2} offers opportunities for your ${planet1.toLowerCase()} qualities to work cooperatively with your ${planet2.toLowerCase()} expression.`,
+      challenging: `Though sextiles are typically favorable, this aspect between ${planet1} and ${planet2} requires conscious effort to utilize the potential between these areas.`,
+      neutral: `The sextile between ${planet1} and ${planet2} presents opportunities for growth when you actively connect your ${planet1.toLowerCase()} and ${planet2.toLowerCase()} energies.`
+    }
+  };
+  
+  return interpretations[aspectType]?.[influence] || 
+    `This ${aspectType} between ${planet1} and ${planet2} influences how these planetary energies interact in your chart.`;
 };

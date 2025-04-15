@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
@@ -50,10 +49,15 @@
 
   body {
     @apply bg-astro-dark text-foreground font-poppins overflow-x-hidden;
+    padding-top: 4rem;
   }
 
   h1, h2, h3, h4 {
     @apply font-unbounded;
+  }
+
+  section {
+    @apply py-16 md:py-24 px-6;
   }
 
   .cosmic-bg {
@@ -68,15 +72,15 @@
   }
 
   .glass-card {
-    @apply bg-opacity-10 bg-white backdrop-blur-md border border-white/10 rounded-2xl shadow-lg;
+    @apply bg-opacity-10 bg-white backdrop-blur-md border border-white/10 rounded-2xl shadow-lg transition-all duration-300 hover:shadow-[0_0_30px_rgba(159,68,211,0.2)];
   }
 
   .glass-nav {
-    @apply bg-opacity-20 bg-astro-navy backdrop-blur-xl border-b border-white/10;
+    @apply bg-opacity-20 bg-astro-navy backdrop-blur-xl border-b border-white/10 shadow-lg;
   }
 
   .glow-border {
-    @apply border border-astro-violet/50 shadow-[0_0_15px_rgba(159,68,211,0.6)];
+    @apply border border-astro-violet/50 shadow-[0_0_15px_rgba(159,68,211,0.6)] transition-all duration-300 hover:shadow-[0_0_25px_rgba(159,68,211,0.8)];
   }
 
   .glow-btn {
@@ -87,5 +91,21 @@
     @apply absolute rounded-full bg-white;
     animation: twinkle 4s ease-in-out infinite;
     animation-delay: calc(var(--delay) * 1s);
+  }
+
+  .loading-dot {
+    @apply w-2 h-2 rounded-full bg-astro-violet;
+    animation: loading-dot 1.4s infinite ease-in-out;
+  }
+}
+
+@keyframes loading-dot {
+  0%, 80%, 100% { 
+    transform: scale(0);
+    opacity: 0;
+  }
+  40% { 
+    transform: scale(1);
+    opacity: 1;
   }
 }
