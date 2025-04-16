@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -142,6 +141,25 @@ const Tarot = () => {
         }
         .card-container.reversed {
           transform: rotateX(180deg);
+        }
+        .loading-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background-color: currentColor;
+          margin: 0 2px;
+          display: inline-block;
+          animation: pulse 1.5s infinite ease-in-out;
+        }
+        .loading-dot:nth-child(2) {
+          animation-delay: 0.3s;
+        }
+        .loading-dot:nth-child(3) {
+          animation-delay: 0.6s;
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 0.4; transform: scale(0.8); }
+          50% { opacity: 1; transform: scale(1.2); }
         }
       `}</style>
     </div>
