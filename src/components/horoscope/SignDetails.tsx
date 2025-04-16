@@ -11,7 +11,7 @@ const SignDetails = ({ signName }: SignDetailsProps) => {
   if (!sign) return null;
 
   return (
-    <div className="w-full bg-navy-800/30 p-6 rounded-xl mt-6">
+    <div className="w-full bg-navy-800/30 p-6 rounded-xl mt-6 border border-purple-500/20 hover:border-purple-500/40 hover:shadow-[0_0_20px_rgba(159,68,211,0.3)] transition-all duration-300">
       <div className="flex items-center gap-4 mb-4">
         <span className="text-4xl">{sign.symbol}</span>
         <div>
@@ -22,7 +22,7 @@ const SignDetails = ({ signName }: SignDetailsProps) => {
 
       <div className="space-y-4">
         <div>
-          <p className="text-sm text-gray-400 mb-2">Fire Sign • {sign.ruling_planet}</p>
+          <p className="text-sm text-gray-400 mb-2">{sign.element} Sign • {sign.ruling_planet}</p>
         </div>
 
         <div>
@@ -32,7 +32,7 @@ const SignDetails = ({ signName }: SignDetailsProps) => {
               <Badge
                 key={trait}
                 variant="outline"
-                className="bg-purple-600/20 border-purple-500/30 text-purple-200"
+                className="bg-purple-600/20 border-purple-500/30 text-purple-200 hover:bg-purple-600/30 transition-colors duration-300"
               >
                 {trait}
               </Badge>
@@ -40,7 +40,7 @@ const SignDetails = ({ signName }: SignDetailsProps) => {
           </div>
         </div>
 
-        <p className="text-sm text-gray-300 line-clamp-3">{sign.description}</p>
+        <p className="text-sm text-gray-300">{sign.description}</p>
       </div>
     </div>
   );

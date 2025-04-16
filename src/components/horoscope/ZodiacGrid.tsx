@@ -11,12 +11,12 @@ const ZodiacGrid = ({ selectedSign, onSelectSign }: ZodiacGridProps) => {
   return (
     <div className="w-full">
       <h2 className="text-2xl font-bold mb-6 text-white">Choose Your Sign</h2>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-6 md:gap-8">
         {zodiacSigns.map((sign) => (
           <Button
             key={sign.name}
             onClick={() => onSelectSign(sign.name)}
-            className={`aspect-square p-6 flex flex-col items-center justify-center transition-all duration-300 ${
+            className={`aspect-square p-4 md:p-6 flex flex-col items-center justify-center transition-all duration-300 hover:scale-105 ${
               selectedSign === sign.name
                 ? 'bg-purple-600 hover:bg-purple-700 shadow-[0_0_20px_rgba(147,51,234,0.5)]'
                 : 'bg-navy-800/50 hover:bg-purple-600/20'

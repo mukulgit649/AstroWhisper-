@@ -13,6 +13,7 @@ const BirthChart = () => {
   const [birthDate, setBirthDate] = useState('');
   const [birthTime, setBirthTime] = useState('');
   const [birthPlace, setBirthPlace] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -28,17 +29,30 @@ const BirthChart = () => {
       return;
     }
 
+    setIsSubmitting(true);
+
     // Save birth data to localStorage for AstroBot to access
     localStorage.setItem('userBirthDate', birthDate);
     if (birthTime) localStorage.setItem('userBirthTime', birthTime);
     if (birthPlace) localStorage.setItem('userBirthPlace', birthPlace);
 
-    // Navigate to results page (in a real app) or show a success message
-    toast({
-      title: "Chart calculated!",
-      description: "Your cosmic blueprint has been revealed.",
-      duration: 3000,
-    });
+    // Simulate calculation time for better UX
+    setTimeout(() => {
+      setIsSubmitting(false);
+      
+      // Show success toast
+      toast({
+        title: "Chart calculated!",
+        description: "Your cosmic blueprint has been revealed.",
+        duration: 3000,
+      });
+
+      // In a real app, we'd navigate to a results page
+      // For now we'll just reset the form
+      setBirthDate('');
+      setBirthTime('');
+      setBirthPlace('');
+    }, 1500);
   };
 
   return (
@@ -60,6 +74,7 @@ const BirthChart = () => {
                 onChange={(e) => setBirthDate(e.target.value)}
                 className="w-full bg-navy-800/50 border-purple-500/20 text-white py-6 transition-all duration-300 hover:border-purple-500/50 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
                 placeholder="dd-mm-yyyy"
+                required
               />
             </div>
 
@@ -94,10 +109,24 @@ const BirthChart = () => {
 
             <Button 
               type="submit"
+              disabled={isSubmitting}
               className="w-full bg-purple-glow text-white py-7 text-lg font-medium rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_rgba(159,68,211,0.8)] group"
             >
-              <Sparkles className="w-5 h-5 mr-2 group-hover:animate-twinkle-fast" />
-              Calculate Chart
+              {isSubmitting ? (
+                <div className="flex items-center gap-2">
+                  <div className="flex space-x-1">
+                    <div className="loading-dot" style={{ animationDelay: '0s' }}></div>
+                    <div className="loading-dot" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="loading-dot" style={{ animationDelay: '0.4s' }}></div>
+                  </div>
+                  <span>Calculating...</span>
+                </div>
+              ) : (
+                <>
+                  <Sparkles className="w-5 h-5 mr-2 group-hover:animate-twinkle-fast" />
+                  Calculate Chart
+                </>
+              )}
             </Button>
 
             <Card className="bg-navy-800/30 border-purple-500/20 p-6 mt-8 transition-all duration-300 hover:border-purple-500/40 hover:shadow-[0_0_20px_rgba(159,68,211,0.3)]">

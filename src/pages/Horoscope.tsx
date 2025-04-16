@@ -40,7 +40,7 @@ const Horoscope = () => {
             most important priorities.
           </p>
 
-          <Card className="bg-navy-800/30 border-purple-500/20 p-6 mb-8">
+          <Card className="bg-navy-800/30 border-purple-500/20 p-6 mb-8 hover:border-purple-500/40 hover:shadow-[0_0_20px_rgba(159,68,211,0.3)] transition-all duration-300">
             <h3 className="text-xl font-bold mb-6 text-white">Lucky Elements Today</h3>
             <div className="grid grid-cols-4 gap-4">
               <div className="text-center">
@@ -54,7 +54,7 @@ const Horoscope = () => {
               <div className="text-center">
                 <p className="text-sm text-gray-400 mb-2">COLOR</p>
                 <div 
-                  className="w-6 h-6 rounded-full mx-auto"
+                  className="w-6 h-6 rounded-full mx-auto border border-purple-500/30"
                   style={{ backgroundColor: luckyElements?.color }}
                 />
               </div>
