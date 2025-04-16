@@ -3,6 +3,7 @@ import { createContext, useContext, ReactNode, useState, useEffect } from 'react
 import { getMockBotResponse } from '@/utils/mockAiResponses';
 import { getZodiacSign, getZodiacData } from '@/utils/zodiacData';
 import { getCardByName } from '@/utils/tarotData';
+import { calculatePlanetaryPositions, getPersonalizedReading, type PlanetaryPositions } from '@/utils/birthChartCalculations';
 
 export interface Message {
   id: string;
@@ -23,6 +24,12 @@ interface UserProfile {
   zodiacSign?: string;
   interests?: string[];
   birthDate?: Date;
+  birthTime?: string;
+  birthPlace?: string;
+  birthChart?: PlanetaryPositions;
+  relationshipStatus?: string;
+  careerInterests?: string[];
+  mentalWellnessGoals?: string[];
 }
 
 const AstroBotContext = createContext<AstroBotContextType | undefined>(undefined);
@@ -68,6 +75,47 @@ export const AstroBotProvider = ({ children }: { children: ReactNode }) => {
       } catch (err) {
         console.error('Failed to parse saved user profile:', err);
       }
+    }
+    
+    // Check for birth chart data from the BirthChart page
+    const birthDateStr = localStorage.getItem('userBirthDate');
+    const birthTimeStr = localStorage.getItem('userBirthTime');
+    const birthPlaceStr = localStorage.getItem('userBirthPlace');
+    
+    if (birthDateStr) {
+      const birthDate = new Date(birthDateStr);
+      
+      setUserProfile(prev => {
+        // Only update if we have new data
+        if (prev.birthDate?.toDateString() !== birthDate.toDateString() || 
+            prev.birthTime !== birthTimeStr || 
+            prev.birthPlace !== birthPlaceStr) {
+          
+          // Calculate some dummy coordinates based on birth place (in a real app, use geocoding)
+          const latitude = birthPlaceStr ? birthPlaceStr.length * 1.5 % 90 : 0;
+          const longitude = birthPlaceStr ? birthPlaceStr.length * 2.5 % 180 : 0;
+          
+          // Calculate planetary positions
+          const birthChart = calculatePlanetaryPositions(
+            birthDate, 
+            birthTimeStr || '12:00', 
+            latitude, 
+            longitude
+          );
+          
+          const zodiacSign = getZodiacSign(birthDate.getMonth() + 1, birthDate.getDate());
+          
+          return { 
+            ...prev, 
+            birthDate,
+            birthTime: birthTimeStr || prev.birthTime,
+            birthPlace: birthPlaceStr || prev.birthPlace,
+            zodiacSign,
+            birthChart
+          };
+        }
+        return prev;
+      });
     }
   }, []);
 
@@ -156,6 +204,54 @@ export const AstroBotProvider = ({ children }: { children: ReactNode }) => {
           };
         });
       }
+    }
+    
+    // Extract relationship status
+    const relationshipMatches = [
+      content.match(/(?:I'm|I am) (single|married|divorced|engaged|dating|in a relationship|widowed)/i),
+      content.match(/(?:my|in) (marriage|relationship|partnership)/i)
+    ].filter(Boolean);
+    
+    if (relationshipMatches.length > 0 && relationshipMatches[0] && relationshipMatches[0][1]) {
+      setUserProfile(prev => ({
+        ...prev,
+        relationshipStatus: relationshipMatches[0]![1].toLowerCase()
+      }));
+    }
+    
+    // Extract career-related information
+    const careerMatches = [
+      content.match(/(?:I|my) (?:work|job|career|profession) (?:as|in|at) (?:a |an |the )?([A-Za-z, ]+)/i),
+      content.match(/(?:I'm|I am) (?:a |an |the )?([A-Za-z]+ist|[A-Za-z]+er|[A-Za-z]+or|engineer|designer|developer|doctor|teacher|student)/i)
+    ].filter(Boolean);
+    
+    if (careerMatches.length > 0 && careerMatches[0] && careerMatches[0][1]) {
+      const careerInfo = careerMatches[0]![1].trim();
+      setUserProfile(prev => {
+        const careerInterests = prev.careerInterests || [];
+        return {
+          ...prev,
+          careerInterests: [...new Set([...careerInterests, careerInfo])]
+        };
+      });
+    }
+    
+    // Extract mental wellness goals
+    const wellnessMatches = [
+      content.match(/(?:I|my) (?:struggle|dealing|coping) with ([A-Za-z, ]+)/i),
+      content.match(/(?:feeling|feel|felt) (anxious|depressed|stressed|overwhelmed|worried|tired|exhausted|burnt out)/i),
+      content.match(/(?:improve|better|enhance) (?:my) (mental health|wellness|mindfulness|peace|calm|focus|concentration)/i)
+    ].filter(Boolean);
+    
+    if (wellnessMatches.length > 0 && wellnessMatches[0] && wellnessMatches[0][1]) {
+      const wellnessInfo = wellnessMatches[0]![1].trim();
+      setUserProfile(prev => {
+        const mentalWellnessGoals = prev.mentalWellnessGoals || [];
+        return {
+          ...prev,
+          mentalWellnessGoals: [...new Set([...mentalWellnessGoals, wellnessInfo])]
+        };
+      });
     }
   };
 
@@ -264,8 +360,12 @@ const analyzeMessageTopic = (message: string): string => {
     return 'health';
   }
   
-  if (lowerMessage.includes('meditation') || lowerMessage.includes('spirit') || lowerMessage.includes('chakra') || lowerMessage.includes('energy') || lowerMessage.includes('soul') || lowerMessage.includes('aura')) {
+  if (lowerMessage.includes('meditation') || lowerMessage.includes('spirit') || lowerMessage.includes('chakra') || lowerMessage.includes('energy') || lowerMessage.includes('soul') || lowerMessage.includes('aura') || lowerMessage.includes('mind')) {
     return 'spirituality';
+  }
+  
+  if (lowerMessage.includes('anxiety') || lowerMessage.includes('stress') || lowerMessage.includes('depression') || lowerMessage.includes('mental health') || lowerMessage.includes('therapy') || lowerMessage.includes('counseling')) {
+    return 'mental_wellness';
   }
   
   return 'general';
@@ -287,6 +387,22 @@ const getContextAwareBotResponse = async (
   // Get the base response for the topic
   let response = getMockBotResponse(message);
   let personalized = false;
+  
+  // Use birth chart data if available for more personalized readings
+  if (userProfile.birthChart) {
+    const personalizedReading = getPersonalizedReading(userProfile.birthChart);
+    
+    if (message.toLowerCase().includes('birth chart') || message.toLowerCase().includes('natal chart')) {
+      response = `${personalizedGreeting}based on your birth chart, ${personalizedReading.summary} The most significant aspect in your chart suggests ${personalizedReading.aspects[0]}.`;
+      personalized = true;
+    }
+    
+    if (message.toLowerCase().includes('recommendation') || message.toLowerCase().includes('advice') || message.toLowerCase().includes('suggestion')) {
+      const randomRecommendation = personalizedReading.recommendations[Math.floor(Math.random() * personalizedReading.recommendations.length)];
+      response = `${personalizedGreeting}the stars suggest: ${randomRecommendation}. This aligns with your ${userProfile.birthChart.sun.sign} sun and ${userProfile.birthChart.moon.sign} moon energies.`;
+      personalized = true;
+    }
+  }
   
   // Special handling for specific query types
   if (topic === 'astrology' && userProfile.zodiacSign) {
@@ -336,12 +452,61 @@ const getContextAwareBotResponse = async (
     }
   }
   
-  // Special handling for love questions if we know the person's sign
-  if (topic === 'love' && userProfile.zodiacSign) {
-    const zodiacData = getZodiacData(userProfile.zodiacSign);
-    if (zodiacData) {
-      response = `${personalizedGreeting}in matters of the heart, your ${zodiacData.name} energy gives you a ${zodiacData.traits[0].toLowerCase()} and ${zodiacData.traits[1].toLowerCase()} approach to relationships. With ${zodiacData.ruling_planet} as your ruling planet, you tend to express love through ${zodiacData.element.toLowerCase()} qualities. Currently, the cosmos suggests focusing on authentic connections that honor your need for ${zodiacData.strengths[2].toLowerCase()}.`;
-      personalized = true;
+  // Enhanced context-aware responses for relationship/love topics
+  if (topic === 'love') {
+    // If we know relationship status
+    if (userProfile.relationshipStatus) {
+      if (userProfile.zodiacSign) {
+        const zodiacData = getZodiacData(userProfile.zodiacSign);
+        if (zodiacData) {
+          if (userProfile.relationshipStatus.includes('single')) {
+            response = `${personalizedGreeting}as a ${zodiacData.name} who is currently single, your ${zodiacData.element} energy attracts partners who appreciate your ${zodiacData.strengths[0].toLowerCase()} nature. The stars suggest focusing on self-development through ${zodiacData.element.toLowerCase()} practices before your next relationship. Your ${zodiacData.ruling_planet} ruler indicates that authentic connections will form when you embrace your ${zodiacData.traits[0].toLowerCase()} qualities.`;
+          } else if (userProfile.relationshipStatus.includes('married') || userProfile.relationshipStatus.includes('relationship')) {
+            response = `${personalizedGreeting}in your current relationship, your ${zodiacData.name} traits of being ${zodiacData.strengths[0].toLowerCase()} and ${zodiacData.strengths[1].toLowerCase()} can create harmony. Your partner likely appreciates your ${zodiacData.element.toLowerCase()} energy. To deepen your connection, embrace the balanced qualities of your ruling planet ${zodiacData.ruling_planet} by being more ${zodiacData.traits[2].toLowerCase()} in how you express love.`;
+          } else {
+            response = `${personalizedGreeting}in matters of the heart, your ${zodiacData.name} energy gives you a ${zodiacData.traits[0].toLowerCase()} and ${zodiacData.traits[1].toLowerCase()} approach to relationships. With ${zodiacData.ruling_planet} as your ruling planet, you tend to express love through ${zodiacData.element.toLowerCase()} qualities. Currently, the cosmos suggests focusing on authentic connections that honor your need for ${zodiacData.strengths[2].toLowerCase()}.`;
+          }
+          personalized = true;
+        }
+      }
+    } else if (userProfile.zodiacSign) {
+      const zodiacData = getZodiacData(userProfile.zodiacSign);
+      if (zodiacData) {
+        response = `${personalizedGreeting}in matters of the heart, your ${zodiacData.name} energy gives you a ${zodiacData.traits[0].toLowerCase()} and ${zodiacData.traits[1].toLowerCase()} approach to relationships. With ${zodiacData.ruling_planet} as your ruling planet, you tend to express love through ${zodiacData.element.toLowerCase()} qualities. Currently, the cosmos suggests focusing on authentic connections that honor your need for ${zodiacData.strengths[2].toLowerCase()}.`;
+        personalized = true;
+      }
+    }
+  }
+  
+  // Enhanced context-aware responses for career-related topics
+  if (topic === 'career') {
+    if (userProfile.zodiacSign) {
+      const zodiacData = getZodiacData(userProfile.zodiacSign);
+      if (zodiacData) {
+        if (userProfile.careerInterests && userProfile.careerInterests.length > 0) {
+          const careerField = userProfile.careerInterests[0];
+          response = `${personalizedGreeting}your work in ${careerField} aligns with your ${zodiacData.name} qualities of being ${zodiacData.strengths[0].toLowerCase()} and ${zodiacData.strengths[1].toLowerCase()}. Your ${zodiacData.element} nature thrives in environments that allow for ${zodiacData.traits[2].toLowerCase()} expression. With ${zodiacData.ruling_planet} as your planetary ruler, you'll find success by incorporating more ${zodiacData.element.toLowerCase()} approaches to your professional challenges.`;
+        } else {
+          response = `${personalizedGreeting}professionally, your ${zodiacData.name} energy excels in careers that value your ${zodiacData.strengths.join(' and ')} qualities. With a ${zodiacData.element} nature, you thrive in ${getElementalCareerAdvice(zodiacData.element)} environments. Your planetary ruler ${zodiacData.ruling_planet} suggests you'll find fulfillment in roles that allow you to express your natural ${zodiacData.traits[0].toLowerCase()} tendencies.`;
+        }
+        personalized = true;
+      }
+    }
+  }
+  
+  // Enhanced context-aware responses for mental wellness topics
+  if (topic === 'mental_wellness' || topic === 'health') {
+    if (userProfile.zodiacSign) {
+      const zodiacData = getZodiacData(userProfile.zodiacSign);
+      if (zodiacData) {
+        if (userProfile.mentalWellnessGoals && userProfile.mentalWellnessGoals.length > 0) {
+          const wellnessGoal = userProfile.mentalWellnessGoals[0];
+          response = `${personalizedGreeting}for managing ${wellnessGoal}, your ${zodiacData.name} energy responds well to ${getElementalWellnessAdvice(zodiacData.element)} practices. As a ${zodiacData.element} sign ruled by ${zodiacData.ruling_planet}, you might find relief through activities that engage your natural ${zodiacData.strengths[1].toLowerCase()} tendencies. Consider incorporating more ${zodiacData.element.toLowerCase()}-based practices into your daily routine.`;
+        } else {
+          response = `${personalizedGreeting}for mental wellness, your ${zodiacData.name} nature benefits from ${getElementalWellnessAdvice(zodiacData.element)} practices. Your ${zodiacData.element} energy responds well to ${zodiacData.element.toLowerCase()}-based healing modalities. With ${zodiacData.ruling_planet} as your planetary ruler, finding balance through ${zodiacData.traits[2].toLowerCase()} activities will particularly support your wellbeing.`;
+        }
+        personalized = true;
+      }
     }
   }
   
@@ -359,3 +524,28 @@ const getContextAwareBotResponse = async (
   
   return response;
 };
+
+// Helper function for career advice based on elemental energy
+const getElementalCareerAdvice = (element: string): string => {
+  const advice: Record<string, string> = {
+    'Fire': 'dynamic, leadership-oriented, and creative',
+    'Earth': 'structured, practical, and results-oriented',
+    'Air': 'intellectual, communicative, and collaborative',
+    'Water': 'empathetic, intuitive, and emotionally supportive'
+  };
+  
+  return advice[element] || 'balanced and authentic';
+};
+
+// Helper function for wellness advice based on elemental energy
+const getElementalWellnessAdvice = (element: string): string => {
+  const advice: Record<string, string> = {
+    'Fire': 'active, energizing, and transformative',
+    'Earth': 'grounding, nature-based, and routine-focused',
+    'Air': 'mentally stimulating, social, and variety-filled',
+    'Water': 'flowing, emotionally expressive, and deeply contemplative'
+  };
+  
+  return advice[element] || 'holistic and balanced';
+};
+
