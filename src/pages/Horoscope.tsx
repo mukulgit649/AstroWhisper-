@@ -1,266 +1,136 @@
-import { useState, useEffect } from 'react';
-import { Moon, Sparkles, RefreshCw } from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import { useDailyReset } from '@/hooks/useDailyReset';
-import BackToHome from '@/components/BackToHome';
-import { getWeeklyForecast } from '@/utils/weeklyForecast';
-import { toast } from '@/hooks/use-toast';
 
-interface HoroscopeData {
-  daily: string;
-  weekly: any[];
-  zodiacSign: string;
+import { useState } from 'react';
+import { Calendar, Moon } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import Navbar from '@/components/Navbar';
+import BackToHome from '@/components/BackToHome';
+
+interface ZodiacSign {
+  name: string;
+  symbol: string;
+  dates: string;
+  element: string;
+  traits: string[];
+  description: string;
 }
 
-const DEFAULT_SIGN = "Aries";
+const zodiacSigns: ZodiacSign[] = [
+  {
+    name: 'Aries',
+    symbol: '♈',
+    dates: 'Mar 21 - Apr 19',
+    element: 'Fire Sign',
+    traits: ['Courageous', 'Energetic', 'Confident', 'Impulsive'],
+    description: 'Aries is the first sign of the zodiac. Those born under this sign are passionate, motivated, and confident leaders who b...'
+  },
+  // ... Add other zodiac signs
+];
 
 const Horoscope = () => {
-  const [horoscope, setHoroscope] = useState<HoroscopeData>({
-    daily: '',
-    weekly: [],
-    zodiacSign: DEFAULT_SIGN
-  });
-  const [isLoading, setIsLoading] = useState(true);
-  const { shouldReset } = useDailyReset('horoscope');
-  const [activeSign, setActiveSign] = useState(DEFAULT_SIGN);
-
-  useEffect(() => {
-    const fetchHoroscope = async (sign: string) => {
-      setIsLoading(true);
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Generate deterministic but unique daily horoscope based on sign and date
-      const today = new Date();
-      const dateStr = `${today.getDate()}-${today.getMonth()}-${today.getFullYear()}`;
-      const dailyText = generateDailyHoroscope(sign, dateStr);
-      
-      // Get weekly forecast from utility
-      const weeklyData = getWeeklyForecast(sign) || [];
-      
-      const newHoroscope = {
-        daily: dailyText,
-        weekly: weeklyData,
-        zodiacSign: sign
-      };
-      
-      setHoroscope(newHoroscope);
-      localStorage.setItem('horoscope', JSON.stringify(newHoroscope));
-      localStorage.setItem('horoscope_sign', sign);
-      setIsLoading(false);
-      
-      toast({
-        title: `${sign} Horoscope Updated`,
-        description: "Your celestial guidance has been refreshed for today.",
-      });
-    };
-
-    // Check if we should reset or load stored data
-    if (shouldReset()) {
-      // Get saved zodiac sign preference or default to Aries
-      const savedSign = localStorage.getItem('horoscope_sign') || activeSign;
-      setActiveSign(savedSign);
-      fetchHoroscope(savedSign);
-    } else {
-      // Load stored horoscope if available
-      const storedHoroscope = localStorage.getItem('horoscope');
-      const storedSign = localStorage.getItem('horoscope_sign');
-      
-      if (storedHoroscope && storedSign) {
-        setHoroscope(JSON.parse(storedHoroscope));
-        setActiveSign(storedSign);
-        setIsLoading(false);
-      } else {
-        // Fetch initial horoscope if nothing is stored
-        fetchHoroscope(activeSign);
-      }
-    }
-  }, [shouldReset]);
-
-  const handleSignChange = (sign: string) => {
-    setActiveSign(sign);
-    const fetchHoroscope = async () => {
-      setIsLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const today = new Date();
-      const dateStr = `${today.getDate()}-${today.getMonth()}-${today.getFullYear()}`;
-      const dailyText = generateDailyHoroscope(sign, dateStr);
-      const weeklyData = getWeeklyForecast(sign) || [];
-      
-      const newHoroscope = {
-        daily: dailyText,
-        weekly: weeklyData,
-        zodiacSign: sign
-      };
-      
-      setHoroscope(newHoroscope);
-      localStorage.setItem('horoscope', JSON.stringify(newHoroscope));
-      localStorage.setItem('horoscope_sign', sign);
-      setIsLoading(false);
-    };
-    
-    fetchHoroscope();
-  };
-
-  const generateDailyHoroscope = (sign: string, dateStr: string): string => {
-    // Array of cosmic influences
-    const influences = [
-      "Venus brings harmony to your relationships",
-      "Mars energizes your ambitions",
-      "Mercury enhances your communication",
-      "The Moon deepens your intuition",
-      "Jupiter expands your opportunities",
-      "Saturn teaches important lessons",
-      "Uranus brings unexpected changes",
-      "Neptune inspires your creativity",
-      "Pluto transforms aspects of your life"
-    ];
-
-    // Array of cosmic advice
-    const advice = [
-      "Take time for self-reflection today",
-      "Express your authentic self boldly",
-      "Listen carefully to those around you",
-      "Trust your intuition on important matters",
-      "Embrace change rather than resisting it",
-      "Balance work with necessary rest",
-      "Connect with nature to restore balance",
-      "Practice gratitude for what you have",
-      "Release what no longer serves you"
-    ];
-
-    // Simple hash function to get consistent but varied horoscopes
-    const hash = (sign + dateStr).split('').reduce((acc, char) => char.charCodeAt(0) + acc, 0);
-    
-    const influence1 = influences[hash % influences.length];
-    const influence2 = influences[(hash + 3) % influences.length];
-    const todayAdvice = advice[(hash + 6) % advice.length];
-    
-    return `Today, ${influence1}. You may also notice that ${influence2.toLowerCase()}. ${todayAdvice}. The cosmic alignment favors your ${sign} energy in unique ways.`;
-  };
+  const [selectedSign, setSelectedSign] = useState<ZodiacSign>(zodiacSigns[0]);
 
   return (
     <div className="min-h-screen cosmic-bg">
       <Navbar />
-      <main className="container mx-auto px-6 py-10 md:py-16 relative z-10">
-        <section className="text-center">
-          <h1 className="font-cinzel text-4xl md:text-5xl font-bold mb-6 glow-text">
-            Cosmic Horoscope
-          </h1>
-          <p className="text-lg text-foreground/70 mb-8 max-w-3xl mx-auto">
-            Explore the cosmic influences shaping your day and week ahead. The stars reveal their wisdom to guide your path.
-          </p>
-
-          <div className="mb-8 flex flex-wrap justify-center gap-2">
-            {['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'].map(sign => (
-              <Button 
-                key={sign}
-                variant={activeSign === sign ? "default" : "outline"}
-                className={`transition-all ${activeSign === sign ? 'glow-btn' : 'hover:bg-primary/20'}`}
-                onClick={() => handleSignChange(sign)}
+      <div className="container mx-auto px-4 py-16 grid md:grid-cols-2 gap-12">
+        {/* Left Column - Sign Selection */}
+        <div>
+          <h2 className="text-3xl font-bold mb-8 font-unbounded">Choose Your Sign</h2>
+          <div className="grid grid-cols-3 gap-4">
+            {zodiacSigns.map((sign) => (
+              <Button
+                key={sign.name}
+                onClick={() => setSelectedSign(sign)}
+                className={`aspect-square p-6 flex flex-col items-center justify-center ${
+                  selectedSign.name === sign.name 
+                    ? 'bg-purple-600 hover:bg-purple-700' 
+                    : 'bg-navy-800/50 hover:bg-purple-600/20'
+                }`}
               >
-                {sign}
+                <span className="text-2xl mb-2">{sign.symbol}</span>
+                <span className="text-sm">{sign.name}</span>
               </Button>
             ))}
           </div>
 
-          <Tabs defaultValue="daily" className="max-w-3xl mx-auto">
-            <TabsList className="grid w-full grid-cols-2 mb-8">
-              <TabsTrigger value="daily">Daily Guidance</TabsTrigger>
-              <TabsTrigger value="weekly">Weekly Forecast</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="daily">
-              <Card className="glass-card mb-8">
-                <CardContent className="p-6 md:p-8">
-                  {isLoading ? (
-                    <div className="flex items-center justify-center space-x-2 py-8">
-                      <p className="text-lg">Consulting the stars</p>
-                      <div className="loading-dot"></div>
-                      <div className="loading-dot"></div>
-                      <div className="loading-dot"></div>
-                    </div>
-                  ) : (
-                    <div className="text-center">
-                      <h2 className="text-2xl font-bold mb-4 flex items-center justify-center gap-2">
-                        <Sparkles className="h-5 w-5" />
-                        {activeSign} Daily Horoscope
-                        <Sparkles className="h-5 w-5" />
-                      </h2>
-                      <p className="text-foreground/90 text-lg leading-relaxed">{horoscope.daily}</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-              
-              <Button 
-                className="glow-btn flex items-center gap-2"
-                onClick={() => handleSignChange(activeSign)}
-                disabled={isLoading}
-              >
-                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-                Refresh Reading
-              </Button>
-            </TabsContent>
-            
-            <TabsContent value="weekly">
-              <div className="space-y-4">
-                {isLoading ? (
-                  <Card className="glass-card">
-                    <CardContent className="p-6 flex items-center justify-center">
-                      <div className="flex items-center justify-center space-x-2 py-8">
-                        <p className="text-lg">Reading the cosmic patterns</p>
-                        <div className="loading-dot"></div>
-                        <div className="loading-dot"></div>
-                        <div className="loading-dot"></div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  horoscope.weekly.map((item: any, index) => (
-                    <Card key={index} className="glass-card">
-                      <CardContent className="p-4 md:p-6">
-                        <h3 className="text-lg font-medium mb-2">{item.area}</h3>
-                        <p>{item.prediction}</p>
-                      </CardContent>
-                    </Card>
-                  ))
-                )}
+          <Card className="mt-8 bg-navy-800/30 border-purple-500/20 p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-3xl">{selectedSign.symbol}</span>
+              <div>
+                <h3 className="text-xl font-bold">{selectedSign.name}</h3>
+                <p className="text-sm text-gray-400">{selectedSign.dates}</p>
               </div>
-            </TabsContent>
-          </Tabs>
-        </section>
-      </main>
-      <Footer />
-      <BackToHome />
+            </div>
+            <p className="text-sm text-gray-300 mb-4">Fire Sign • Mars</p>
+            <div className="mb-4">
+              <h4 className="text-sm text-gray-400 uppercase mb-2">TRAITS</h4>
+              <div className="flex flex-wrap gap-2">
+                {selectedSign.traits.map(trait => (
+                  <span key={trait} className="text-sm bg-purple-600/20 px-3 py-1 rounded-full">
+                    {trait}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <p className="text-sm text-gray-300">{selectedSign.description}</p>
+          </Card>
+        </div>
 
-      <style jsx>{`
-        .loading-dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background-color: currentColor;
-          margin: 0 2px;
-          display: inline-block;
-          animation: pulse 1.5s infinite ease-in-out;
-        }
-        .loading-dot:nth-child(2) {
-          animation-delay: 0.3s;
-        }
-        .loading-dot:nth-child(3) {
-          animation-delay: 0.6s;
-        }
-        @keyframes pulse {
-          0%, 100% { opacity: 0.4; transform: scale(0.8); }
-          50% { opacity: 1; transform: scale(1.2); }
-        }
-      `}</style>
+        {/* Right Column - Horoscope Reading */}
+        <div>
+          <div className="flex items-center gap-4 mb-8">
+            <span className="text-4xl">{selectedSign.symbol}</span>
+            <div>
+              <h2 className="text-3xl font-bold font-unbounded">{selectedSign.name} Horoscope</h2>
+              <p className="text-gray-400">April 15, 2025</p>
+            </div>
+          </div>
+
+          <p className="text-lg text-gray-200 leading-relaxed mb-8">
+            Today is a powerful day for taking action on your goals, Aries. Your ruling planet Mars is fueling your 
+            natural fire, giving you an extra boost of energy and determination. Use this cosmic gift wisely by 
+            focusing on your most important priorities. Unexpected opportunities may arise in your career sector, so 
+            stay alert and ready to seize the moment. Your confidence is magnetic now – others will be drawn to 
+            your leadership and passion. In relationships, express your desires clearly but remember to listen as well. 
+            Balance your assertiveness with patience for best results.
+          </p>
+
+          <Card className="bg-navy-800/30 border-purple-500/20 p-6 mb-8">
+            <h3 className="text-xl font-bold mb-6">Lucky Elements Today</h3>
+            <div className="grid grid-cols-4 gap-4">
+              <div className="text-center">
+                <p className="text-sm text-gray-400 mb-2">NUMBER</p>
+                <p className="text-xl text-purple-400">9</p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-gray-400 mb-2">DAY</p>
+                <p className="text-xl text-purple-400">Saturday</p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-gray-400 mb-2">COLOR</p>
+                <p className="text-xl text-red-400">Red</p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-gray-400 mb-2">ELEMENT</p>
+                <p className="text-xl text-purple-400">Fire</p>
+              </div>
+            </div>
+          </Card>
+
+          <div className="flex gap-4">
+            <Button className="flex-1 bg-purple-600 hover:bg-purple-700">
+              <Calendar className="w-4 h-4 mr-2" />
+              Weekly Forecast
+            </Button>
+            <Button variant="outline" className="flex-1 border-purple-500/20 hover:bg-purple-600/20">
+              <Moon className="w-4 h-4 mr-2" />
+              Moon Phase Report
+            </Button>
+          </div>
+        </div>
+      </div>
+      <BackToHome />
     </div>
   );
 };

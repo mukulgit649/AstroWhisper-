@@ -1,165 +1,102 @@
+
 import { useState } from 'react';
-import { calculatePlanetaryPositions, getPersonalizedReading } from '@/utils/birthChartCalculations';
-import BackToHome from '@/components/BackToHome';
+import { MapPin, Clock, CalendarDays } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
 import Navbar from '@/components/Navbar';
+import BackToHome from '@/components/BackToHome';
 
 const BirthChart = () => {
-  const [birthDate, setBirthDate] = useState<Date | null>(null);
+  const [birthDate, setBirthDate] = useState('');
   const [birthTime, setBirthTime] = useState('');
-  const [latitude, setLatitude] = useState<number | null>(null);
-  const [longitude, setLongitude] = useState<number | null>(null);
-  const [chartData, setChartData] = useState<any>(null);
-  const [reading, setReading] = useState<any>(null);
+  const [birthPlace, setBirthPlace] = useState('');
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    switch (name) {
-      case 'birthTime':
-        setBirthTime(value);
-        break;
-      case 'latitude':
-        setLatitude(Number(value));
-        break;
-      case 'longitude':
-        setLongitude(Number(value));
-        break;
-      default:
-        break;
-    }
-  };
-
-  const handleDateChange = (date: Date | null) => {
-    setBirthDate(date);
-  };
-
-  const handleSubmit = () => {
-    if (birthDate && birthTime && latitude !== null && longitude !== null) {
-      const positions = calculatePlanetaryPositions(birthDate, birthTime, latitude, longitude);
-      setChartData(positions);
-      const personalizedReading = getPersonalizedReading(positions);
-      setReading(personalizedReading);
-    } else {
-      alert("Please fill in all the birth chart details.");
-    }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle form submission
   };
 
   return (
     <div className="min-h-screen cosmic-bg">
       <Navbar />
-      <div className="container mx-auto py-16 px-6 relative z-10">
-        <h1 className="text-3xl font-bold text-center text-white mb-8 glow-text">
-          Generate Your Birth Chart
-        </h1>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Input Section */}
-          <div>
-            <div className="mb-4">
-              <label className="block text-white text-sm font-bold mb-2">
-                Birth Date:
+      <div className="container mx-auto px-4 py-16 md:py-24 flex flex-col md:flex-row items-center justify-between gap-12">
+        {/* Left Column - Form */}
+        <div className="w-full md:w-1/2 max-w-lg">
+          <h2 className="text-4xl font-bold mb-8 font-unbounded">Enter Your Details</h2>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-purple-300 flex items-center gap-2">
+                <CalendarDays className="h-5 w-5" />
+                Birth Date
               </label>
-              <input
+              <Input
                 type="date"
-                onChange={(e: any) => handleDateChange(new Date(e.target.value))}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                value={birthDate}
+                onChange={(e) => setBirthDate(e.target.value)}
+                className="w-full bg-navy-800/50 border-purple-500/20 text-white"
+                placeholder="dd-mm-yyyy"
               />
             </div>
 
-            <div className="mb-4">
-              <label className="block text-white text-sm font-bold mb-2">
-                Birth Time (HH:MM):
+            <div className="space-y-2">
+              <label className="text-purple-300 flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                Birth Time (optional)
               </label>
-              <input
+              <Input
                 type="time"
-                name="birthTime"
-                onChange={handleInputChange}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                value={birthTime}
+                onChange={(e) => setBirthTime(e.target.value)}
+                className="w-full bg-navy-800/50 border-purple-500/20 text-white"
               />
+              <p className="text-sm text-gray-400">For more accurate ascendant calculation</p>
             </div>
 
-            <div className="mb-4">
-              <label className="block text-white text-sm font-bold mb-2">
-                Latitude:
+            <div className="space-y-2">
+              <label className="text-purple-300 flex items-center gap-2">
+                <MapPin className="h-5 w-5" />
+                Birth Place (optional)
               </label>
-              <input
-                type="number"
-                name="latitude"
-                onChange={handleInputChange}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              <Input
+                type="text"
+                value={birthPlace}
+                onChange={(e) => setBirthPlace(e.target.value)}
+                className="w-full bg-navy-800/50 border-purple-500/20 text-white"
+                placeholder="City, Country"
               />
+              <p className="text-sm text-gray-400">For house system calculations</p>
             </div>
 
-            <div className="mb-6">
-              <label className="block text-white text-sm font-bold mb-2">
-                Longitude:
-              </label>
-              <input
-                type="number"
-                name="longitude"
-                onChange={handleInputChange}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              />
-            </div>
+            <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white py-6 text-lg font-medium rounded-xl transition-all duration-300">
+              Calculate Chart
+            </Button>
 
-            <div className="flex items-center justify-between">
-              <button
-                className="glow-btn"
-                type="button"
-                onClick={handleSubmit}
-              >
-                Calculate Chart
-              </button>
+            <Card className="bg-navy-800/30 border-purple-500/20 p-6 mt-8">
+              <h3 className="text-xl font-semibold mb-4">About Birth Charts</h3>
+              <p className="text-gray-300 text-sm leading-relaxed">
+                Your birth chart is a cosmic snapshot of the sky at the moment you were born. It reveals your 
+                sun sign (core identity), moon sign (emotional nature), ascendant (outward persona), and 
+                planetary influences that shape your unique cosmic blueprint.
+              </p>
+            </Card>
+          </form>
+        </div>
+
+        {/* Right Column - Description */}
+        <div className="w-full md:w-1/2 text-center md:text-left">
+          <div className="flex justify-center mb-8">
+            <div className="w-16 h-16 rounded-full bg-purple-600/20 flex items-center justify-center">
+              <div className="text-3xl">✧</div>
             </div>
           </div>
-
-          {/* Output Section */}
-          <div>
-            {chartData && (
-              <div className="text-white">
-                <h2 className="text-xl font-semibold mb-4 glow-text">
-                  Planetary Positions:
-                </h2>
-                <ul>
-                  {Object.entries(chartData).map(([planet, data]: any) => (
-                    <li key={planet} className="mb-2">
-                      {planet}: {data.sign} - {data.degree}°
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {reading && (
-              <div className="text-white mt-8">
-                <h2 className="text-xl font-semibold mb-4 glow-text">
-                  Personalized Reading:
-                </h2>
-                <p className="mb-4">{reading.summary}</p>
-
-                <h3 className="text-lg font-semibold mb-2 glow-text">
-                  Key Aspects:
-                </h3>
-                <ul>
-                  {reading.aspects.map((aspect: string, index: number) => (
-                    <li key={index} className="mb-1">
-                      - {aspect}
-                    </li>
-                  ))}
-                </ul>
-
-                <h3 className="text-lg font-semibold mb-2 mt-4 glow-text">
-                  Recommendations:
-                </h3>
-                <ul>
-                  {reading.recommendations.map((recommendation: string, index: number) => (
-                    <li key={index} className="mb-1">
-                      - {recommendation}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 font-unbounded">
+            Discover Your Cosmic Blueprint
+          </h1>
+          <p className="text-xl text-gray-300 leading-relaxed">
+            Enter your birth details to calculate your personalized natal chart and uncover the planetary 
+            influences that shape your life journey.
+          </p>
         </div>
       </div>
       <BackToHome />
