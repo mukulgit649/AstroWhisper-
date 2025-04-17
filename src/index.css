@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
@@ -51,6 +50,7 @@
   body {
     @apply bg-astro-dark text-foreground font-poppins overflow-x-hidden;
     padding-top: 4rem;
+    padding-bottom: 4rem; /* Add bottom padding to prevent footer from being hidden */
   }
 
   h1, h2, h3, h4 {
@@ -66,6 +66,8 @@
     position: relative;
     height: 100%;
     overflow: hidden;
+    @apply min-h-screen flex flex-col; /* Ensure full height and flex layout */
+    padding-bottom: 4rem; /* Add bottom padding to prevent footer from being hidden */
   }
 
   .glow-text {

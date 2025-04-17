@@ -1,218 +1,155 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight, Moon, Sun, MessageCircle, Sparkles, Star, Map } from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import StarsBackground from '@/components/Stars'; // Renamed import to avoid conflict
-import CosmicBackground from '@/components/CosmicBackground';
-import { zodiacSigns } from '@/utils/zodiacData';
+import Navbar from '@/components/Navbar';
 
 const Index = () => {
-  const [activeSign, setActiveSign] = useState(0);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
 
   useEffect(() => {
-    setIsLoaded(true);
-    const interval = setInterval(() => {
-      setActiveSign((prev) => (prev + 1) % zodiacSigns.length);
-    }, 3000);
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
-    return () => clearInterval(interval);
-  }, []);
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
 
-  const fadeInAnimation = "opacity-0 translate-y-4 transition-all duration-700";
-  const fadeInLoaded = "opacity-100 translate-y-0";
+  const testimonials = [
+    {
+      id: 1,
+      name: 'Anya Sharma',
+      text: "AstroWhisper's daily horoscopes are spot on! They've given me clarity and guidance in my daily life.",
+      image: 'https://images.unsplash.com/photo-1599507348368-399994a19997?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fHdvbWFuJTIwcG9ydHJhaXR8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=500&q=60',
+    },
+    {
+      id: 2,
+      name: 'Raj Patel',
+      text: 'The AstroBot is incredibly helpful! I asked about my career, and the insights were surprisingly accurate and actionable.',
+      image: 'https://images.unsplash.com/photo-1544005313-943cb025c0e7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fG1hbiUyMHBvcnRyYWl0fGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60',
+    },
+    {
+      id: 3,
+      name: 'Emily Chen',
+      text: 'I love the tarot readings! They provide a unique perspective and have helped me understand my relationships better.',
+      image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTd8fHdvbWFuJTIwcG9ydHJhaXR8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=500&q=60',
+    },
+  ];
 
   return (
-    <div className="cosmic-bg min-h-screen flex flex-col">
-      <StarsBackground count={150} />
-      <CosmicBackground />
-      
+    <div className="cosmic-bg flex flex-col min-h-screen">
       <Navbar />
-      
-      <main className="flex-grow relative z-10">
-        {/* Hero Section */}
-        <section className="py-16 md:py-24 px-4">
-          <div className="container mx-auto">
-            <div className="flex flex-col md:flex-row items-center">
-              <div className={`md:w-1/2 mb-10 md:mb-0 ${isLoaded ? fadeInLoaded : fadeInAnimation}`} style={{ transitionDelay: '0.2s' }}>
-                <h1 className="font-cinzel text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6 glow-text">
-                  Discover Your Cosmic Guidance
-                </h1>
-                <p className="text-lg md:text-xl text-foreground/80 mb-8 max-w-lg">
-                  Unlock the mysteries of the universe with AI-powered astrological insights, tarot readings, and personalized guidance.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <Button className="glow-btn" size="lg">
-                    Explore Your Stars
-                  </Button>
-                  <Button variant="outline" className="border-astro-purple/50 hover:bg-astro-purple/10" size="lg">
-                    <Moon className="mr-2 h-5 w-5" />
-                    Today's Horoscope
-                  </Button>
-                </div>
-              </div>
-              
-              <div className={`md:w-1/2 relative ${isLoaded ? fadeInLoaded : fadeInAnimation}`} style={{ transitionDelay: '0.4s' }}>
-                <div className="relative w-[300px] h-[300px] md:w-[400px] md:h-[400px] mx-auto">
-                  <div className="absolute inset-0 rounded-full border-2 border-astro-glow/20 animate-rotate-slow"></div>
-                  <div className="absolute inset-[20px] rounded-full border-2 border-astro-violet/30 animate-rotate-slow" style={{ animationDuration: '40s', animationDirection: 'reverse' }}></div>
-                  <div className="absolute inset-[40px] rounded-full border-2 border-astro-purple/20 animate-rotate-slow" style={{ animationDuration: '80s' }}></div>
-                  
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-r from-astro-violet to-astro-purple animate-pulse-glow flex items-center justify-center">
-                    <span className="text-4xl md:text-5xl">
-                      {zodiacSigns[activeSign].symbol}
-                    </span>
-                  </div>
-                  
-                  {zodiacSigns.map((sign, index) => {
-                    // Calculate position around the circle
-                    const angle = (index * (360 / zodiacSigns.length)) * (Math.PI / 180);
-                    const radius = 140; // Can be adjusted based on your design
-                    const x = Math.cos(angle) * radius;
-                    const y = Math.sin(angle) * radius;
-                    
-                    return (
-                      <div 
-                        key={sign.name}
-                        className={`absolute w-10 h-10 rounded-full flex items-center justify-center bg-astro-navy border border-white/10 transition-all duration-300 ${index === activeSign ? 'scale-125 border-astro-violet' : 'scale-100'}`}
-                        style={{ 
-                          left: `calc(50% + ${x}px - 20px)`,
-                          top: `calc(50% + ${y}px - 20px)`,
-                          boxShadow: index === activeSign ? '0 0 15px rgba(159,68,211,0.6)' : 'none'
-                        }}
-                        onClick={() => setActiveSign(index)}
-                      >
-                        <span>{sign.symbol}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+      <section className="py-24 md:py-32 px-6">
+        <div className="container mx-auto text-center">
+          <div className="flex justify-center mb-10">
+            <div className="w-24 h-24 rounded-full bg-purple-600/20 flex items-center justify-center shadow-[0_0_15px_rgba(159,68,211,0.4)] animate-pulse-glow">
+              <Moon className="w-12 h-12 text-purple-400" />
             </div>
           </div>
-        </section>
-        
-        {/* Features Section */}
-        <section className="py-16 px-4">
-          <div className="container mx-auto">
-            <div className={`text-center mb-16 ${isLoaded ? fadeInLoaded : fadeInAnimation}`} style={{ transitionDelay: '0.6s' }}>
-              <h2 className="font-unbounded text-3xl md:text-4xl font-bold mb-4 glow-text">
-                Cosmic Services
-              </h2>
-              <p className="text-lg text-foreground/70 max-w-xl mx-auto">
-                Explore our mystical AI-powered tools to gain insight into your past, present, and future.
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <Link to="/horoscope" className={`${isLoaded ? fadeInLoaded : fadeInAnimation}`} style={{ transitionDelay: '0.7s' }}>
-                <Card className="glass-card h-full hover:shadow-[0_0_20px_rgba(159,68,211,0.4)] transition-all duration-300 overflow-hidden group">
-                  <CardContent className="p-6 flex flex-col h-full">
-                    <div className="rounded-full bg-astro-purple/20 w-14 h-14 flex items-center justify-center mb-4 group-hover:bg-astro-purple/30 transition-colors duration-300">
-                      <Sun className="h-7 w-7 text-astro-glow" />
-                    </div>
-                    <h3 className="font-unbounded text-xl font-semibold mb-3">Daily Horoscope</h3>
-                    <p className="text-foreground/70 mb-4 flex-grow">
-                      Receive personalized daily guidance based on your zodiac sign and planetary alignments.
-                    </p>
-                    <div className="flex items-center text-astro-violet group-hover:text-astro-glow transition-colors duration-300">
-                      <span className="mr-2 font-medium">Read today's stars</span>
-                      <ChevronRight className="h-5 w-5 transform group-hover:translate-x-1 transition-transform duration-300" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-              
-              <Link to="/tarot" className={`${isLoaded ? fadeInLoaded : fadeInAnimation}`} style={{ transitionDelay: '0.8s' }}>
-                <Card className="glass-card h-full hover:shadow-[0_0_20px_rgba(159,68,211,0.4)] transition-all duration-300 overflow-hidden group">
-                  <CardContent className="p-6 flex flex-col h-full">
-                    <div className="rounded-full bg-astro-purple/20 w-14 h-14 flex items-center justify-center mb-4 group-hover:bg-astro-purple/30 transition-colors duration-300">
-                      <Star className="h-7 w-7 text-astro-glow" />
-                    </div>
-                    <h3 className="font-unbounded text-xl font-semibold mb-3">Tarot Reading</h3>
-                    <p className="text-foreground/70 mb-4 flex-grow">
-                      Draw virtual tarot cards with AI-generated interpretations tailored to your spiritual journey.
-                    </p>
-                    <div className="flex items-center text-astro-violet group-hover:text-astro-glow transition-colors duration-300">
-                      <span className="mr-2 font-medium">Pull your cards</span>
-                      <ChevronRight className="h-5 w-5 transform group-hover:translate-x-1 transition-transform duration-300" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-              
-              <Link to="/astrobot" className={`${isLoaded ? fadeInLoaded : fadeInAnimation}`} style={{ transitionDelay: '0.9s' }}>
-                <Card className="glass-card h-full hover:shadow-[0_0_20px_rgba(159,68,211,0.4)] transition-all duration-300 overflow-hidden group">
-                  <CardContent className="p-6 flex flex-col h-full">
-                    <div className="rounded-full bg-astro-purple/20 w-14 h-14 flex items-center justify-center mb-4 group-hover:bg-astro-purple/30 transition-colors duration-300">
-                      <MessageCircle className="h-7 w-7 text-astro-glow" />
-                    </div>
-                    <h3 className="font-unbounded text-xl font-semibold mb-3">Ask AstroBot</h3>
-                    <p className="text-foreground/70 mb-4 flex-grow">
-                      Chat with our mystical AI companion for personalized guidance on life's burning questions.
-                    </p>
-                    <div className="flex items-center text-astro-violet group-hover:text-astro-glow transition-colors duration-300">
-                      <span className="mr-2 font-medium">Start chatting</span>
-                      <ChevronRight className="h-5 w-5 transform group-hover:translate-x-1 transition-transform duration-300" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-              
-              <Link to="/birthchart" className={`${isLoaded ? fadeInLoaded : fadeInAnimation}`} style={{ transitionDelay: '1s' }}>
-                <Card className="glass-card h-full hover:shadow-[0_0_20px_rgba(159,68,211,0.4)] transition-all duration-300 overflow-hidden group">
-                  <CardContent className="p-6 flex flex-col h-full">
-                    <div className="rounded-full bg-astro-purple/20 w-14 h-14 flex items-center justify-center mb-4 group-hover:bg-astro-purple/30 transition-colors duration-300">
-                      <Map className="h-7 w-7 text-astro-glow" />
-                    </div>
-                    <h3 className="font-unbounded text-xl font-semibold mb-3">Birth Chart</h3>
-                    <p className="text-foreground/70 mb-4 flex-grow">
-                      Generate your complete astrological blueprint based on your exact birth time and location.
-                    </p>
-                    <div className="flex items-center text-astro-violet group-hover:text-astro-glow transition-colors duration-300">
-                      <span className="mr-2 font-medium">Map your stars</span>
-                      <ChevronRight className="h-5 w-5 transform group-hover:translate-x-1 transition-transform duration-300" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            </div>
+          <h1 className="text-4xl md:text-5xl font-bold mb-8 font-unbounded text-white">
+            Unlock Your Cosmic Potential
+          </h1>
+          <p className="text-xl text-gray-300 leading-relaxed mb-12">
+            Explore the mystical world of astrology and gain profound insights into your life's journey.
+          </p>
+          <div className="flex flex-col md:flex-row justify-center items-center gap-6">
+            <Link to="/horoscope" className="glow-btn group">
+              View Daily Horoscope <ChevronRight className="w-5 h-5 ml-2 group-hover:animate-pulse-fast" />
+            </Link>
+            <Link to="/birthchart" className="text-gray-300 hover:text-white transition-colors duration-300 hover:scale-105">
+              Discover Your Birth Chart
+            </Link>
           </div>
-        </section>
-        
-        {/* Call to Action */}
-        <section className="py-16 px-4">
-          <div className="container mx-auto">
-            <div className={`relative rounded-2xl overflow-hidden ${isLoaded ? fadeInLoaded : fadeInAnimation}`} style={{ transitionDelay: '1s' }}>
-              <div className="absolute inset-0 bg-gradient-to-r from-astro-purple to-astro-navy opacity-90"></div>
-              
-              <div className="relative z-10 py-16 px-4 md:px-10 flex flex-col items-center text-center">
-                <Sparkles className="h-12 w-12 text-white mb-6 animate-pulse" />
-                
-                <h2 className="font-cinzel text-3xl md:text-4xl font-bold mb-6 text-white">
-                  Begin Your Cosmic Journey Today
-                </h2>
-                
-                <p className="text-lg text-white/90 max-w-2xl mb-8">
-                  Sign up now to unlock premium astrological insights, save your readings, and receive 
-                  personalized celestial guidance tailored to your unique birth chart.
-                </p>
-                
-                <Button className="glow-btn text-lg" size="lg">
-                  Create Free Account
-                </Button>
+        </div>
+      </section>
+
+      <section className="py-24 md:py-32 px-6 bg-astro-navy/30">
+        <div className="container mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <Link to="/horoscope" className="glass-card p-6 hover:scale-105">
+              <div className="flex items-center space-x-4 mb-4">
+                <Sun className="w-8 h-8 text-yellow-400" />
+                <h3 className="text-xl font-semibold text-white">Daily Horoscopes</h3>
               </div>
-            </div>
+              <p className="text-gray-300">Get personalized insights into your day based on your zodiac sign.</p>
+            </Link>
+            <Link to="/tarot" className="glass-card p-6 hover:scale-105">
+              <div className="flex items-center space-x-4 mb-4">
+                <Sparkles className="w-8 h-8 text-purple-400" />
+                <h3 className="text-xl font-semibold text-white">Tarot Readings</h3>
+              </div>
+              <p className="text-gray-300">Unlock hidden truths and guidance with a personalized tarot card reading.</p>
+            </Link>
+            <Link to="/astrobot" className="glass-card p-6 hover:scale-105">
+              <div className="flex items-center space-x-4 mb-4">
+                <MessageCircle className="w-8 h-8 text-blue-400" />
+                <h3 className="text-xl font-semibold text-white">Ask AstroBot</h3>
+              </div>
+              <p className="text-gray-300">Get instant answers to your burning questions with our AI-powered astrologer.</p>
+            </Link>
           </div>
-        </section>
-      </main>
-      
+        </div>
+      </section>
+
+      <section className="py-24 md:py-32 px-6">
+        <div className="container mx-auto text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-12 font-unbounded text-white">
+            What Our Users Are Saying
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial) => (
+              <div key={testimonial.id} className="glass-card p-6">
+                <img src={testimonial.image} alt={testimonial.name} className="w-20 h-20 rounded-full mx-auto mb-4" />
+                <h4 className="text-lg font-semibold text-white">{testimonial.name}</h4>
+                <p className="text-gray-300 italic mt-2">"{testimonial.text}"</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-24 md:py-32 px-6 bg-astro-navy/30">
+        <div className="container mx-auto text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-12 font-unbounded text-white">
+            Explore the Cosmos
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <Link to="/birthchart" className="glass-card p-6 hover:scale-105">
+              <Star className="w-10 h-10 text-yellow-400 mb-4" />
+              <h3 className="text-xl font-semibold text-white">Birth Charts</h3>
+              <p className="text-gray-300">Discover your unique cosmic blueprint.</p>
+            </Link>
+            <Link to="/compatibility" className="glass-card p-6 hover:scale-105">
+              <Heart className="w-10 h-10 text-red-400 mb-4" />
+              <h3 className="text-xl font-semibold text-white">Compatibility</h3>
+              <p className="text-gray-300">Find out how compatible you are with others.</p>
+            </Link>
+            <Link to="/transit" className="glass-card p-6 hover:scale-105">
+              <Map className="w-10 h-10 text-blue-400 mb-4" />
+              <h3 className="text-xl font-semibold text-white">Transit Forecast</h3>
+              <p className="text-gray-300">Plan your future with astrological insights.</p>
+            </Link>
+            <Link to="/learn" className="glass-card p-6 hover:scale-105">
+              <BookOpen className="w-10 h-10 text-green-400 mb-4" />
+              <h3 className="text-xl font-semibold text-white">Learn Astrology</h3>
+              <p className="text-gray-300">Expand your knowledge of the stars.</p>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <Footer />
     </div>
   );
 };
 
 export default Index;
+
+const Heart = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-heart"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3.5c-1.71 0-3 1.02-3.5 2.14C12.5 4.52 11 3.5 9.5 3.5A5.5 5.5 0 0 0 4 8.5c0 2.29 1.51 4.04 3 5.5L12 21l7-7Z"/></svg>
+);
+
+const BookOpen = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-book-open"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+);

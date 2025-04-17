@@ -55,7 +55,7 @@ const BirthChart = () => {
   };
 
   return (
-    <div className="min-h-screen cosmic-bg flex flex-col">
+    <div className="cosmic-bg flex flex-col min-h-screen">
       <Navbar />
       <div className="container mx-auto px-6 py-20 md:py-28 flex flex-col md:flex-row items-center justify-between gap-16 flex-grow">
         {/* Left Column - Form */}
