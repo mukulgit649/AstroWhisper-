@@ -7,7 +7,7 @@ import Navbar from '@/components/Navbar';
 import BackToHome from '@/components/BackToHome';
 import ZodiacGrid from '@/components/horoscope/ZodiacGrid';
 import SignDetails from '@/components/horoscope/SignDetails';
-import { getDailyLuckyElements } from '@/utils/zodiacData';
+import { getZodiacData, getDailyLuckyElements } from '@/utils/zodiacData';
 
 const Horoscope = () => {
   const [selectedSign, setSelectedSign] = useState<string>('Aries');

@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Sparkles, Eye, RefreshCcw, BookOpen, Feather } from 'lucide-react';
+import { Sparkles, Eye, RefreshCcw, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/hover-card';
 import { Separator } from '@/components/ui/separator';
@@ -26,7 +26,6 @@ const Tarot = () => {
         setCardContent(JSON.parse(savedCard));
         setIsFlipped(true);
       } catch (e) {
-        // If parsing fails, we'll just draw a new card
         console.error("Error parsing saved card:", e);
       }
     }
@@ -61,56 +60,56 @@ const Tarot = () => {
   return (
     <div className="min-h-screen cosmic-bg">
       <Navbar />
-      <div className="container mx-auto px-6 py-20 text-center max-w-4xl">
-        <div className="flex justify-center mb-10">
-          <div className="w-20 h-20 rounded-full bg-purple-600/20 flex items-center justify-center shadow-[0_0_15px_rgba(159,68,211,0.4)] animate-pulse-glow">
-            <Sparkles className="w-10 h-10 text-purple-400" />
-          </div>
-        </div>
-
-        <h1 className="text-4xl md:text-5xl font-bold mb-8 font-unbounded glow-text">
-          {cardContent ? 'Your Mystical Reading' : 'Select a Card'}
-        </h1>
-        <p className="text-xl text-gray-300 mb-16 max-w-2xl mx-auto">
-          {cardContent 
-            ? `You have drawn ${cardContent.name}. Focus on its message for your day.` 
-            : 'Focus on your question or intention, then choose one card to receive your mystical guidance.'}
-        </p>
-
+      <div className="container mx-auto px-6 py-12 text-center max-w-5xl">
         {!cardContent && (
-          <div className="flex justify-center gap-12 max-w-3xl mx-auto">
-            {[1, 2, 3].map((cardNumber) => (
-              <div
-                key={cardNumber}
-                className={`w-[270px] aspect-[2/3] rounded-2xl border-2 transition-all duration-500 transform hover:scale-110 hover:shadow-[0_0_30px_rgba(159,68,211,0.6)] cursor-pointer ${
-                  selectedCard === cardNumber 
-                    ? 'border-purple-500 shadow-[0_0_30px_rgba(159,68,211,0.8)]'
-                    : 'border-purple-500/30'
-                }`}
-                onClick={() => handleCardClick(cardNumber)}
-              >
-                <div className="h-full flex flex-col items-center justify-center bg-navy-800/30 rounded-xl backdrop-blur-sm">
-                  <Sparkles className={`w-8 h-8 text-purple-400 mb-4 ${selectedCard === cardNumber ? 'animate-twinkle-fast' : ''}`} />
-                  <p className="text-gray-400 uppercase tracking-wider">CARD</p>
-                  <p className="text-3xl font-bold">{cardNumber}</p>
-                </div>
+          <>
+            <div className="flex justify-center mb-6">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center">
+                <Sparkles className="w-10 h-10 text-purple-400 animate-pulse" />
               </div>
-            ))}
-          </div>
+            </div>
+
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 font-unbounded text-white">
+              Select a Card
+            </h1>
+            <p className="text-xl text-gray-300 mb-16 max-w-2xl mx-auto">
+              Focus on your question or intention, then choose one card to receive your mystical guidance.
+            </p>
+
+            <div className="flex justify-center gap-12 max-w-3xl mx-auto">
+              {[1, 2, 3].map((cardNumber) => (
+                <div
+                  key={cardNumber}
+                  className={`w-[210px] aspect-[2/3] rounded-2xl border-2 transition-all duration-500 transform hover:scale-105 hover:shadow-[0_0_30px_rgba(159,68,211,0.6)] cursor-pointer ${
+                    selectedCard === cardNumber 
+                      ? 'border-purple-500 shadow-[0_0_30px_rgba(159,68,211,0.8)]'
+                      : 'border-purple-500/30'
+                  }`}
+                  onClick={() => handleCardClick(cardNumber)}
+                >
+                  <div className="h-full flex flex-col items-center justify-center bg-navy-800/30 rounded-xl backdrop-blur-sm">
+                    <Sparkles className={`w-8 h-8 text-purple-400 mb-4 ${selectedCard === cardNumber ? 'animate-twinkle-fast' : ''}`} />
+                    <p className="text-gray-400 uppercase tracking-wider text-sm">CARD</p>
+                    <p className="text-3xl font-bold">{cardNumber}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
 
         {cardContent && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
             <div className="flex flex-col items-center">
               <div 
-                className={`w-[270px] aspect-[2/3] rounded-2xl border-2 border-purple-500 mb-8 shadow-[0_0_30px_rgba(159,68,211,0.5)] transition-all duration-1000 transform ${isFlipped ? 'scale-110' : 'scale-100'} hover:shadow-[0_0_40px_rgba(159,68,211,0.7)]`}
+                className="w-[240px] aspect-[2/3] rounded-2xl border-2 border-purple-500 mb-8 shadow-[0_0_30px_rgba(159,68,211,0.5)] transition-all duration-1000 transform hover:shadow-[0_0_40px_rgba(159,68,211,0.7)]"
               >
                 <div className="h-full flex flex-col items-center justify-center bg-purple-900/70 rounded-xl p-6 text-center backdrop-blur-sm">
                   <p className="text-sm text-purple-200 uppercase tracking-wider mb-1">MAJOR ARCANA</p>
-                  <h3 className="text-2xl font-bold mb-6 text-white font-cinzel">{cardContent.name}</h3>
+                  <h3 className="text-2xl font-bold mb-6 text-white">{cardContent.name}</h3>
                   
                   <div className="w-16 h-16 border border-purple-400/50 rounded-full flex items-center justify-center mb-6">
-                    <p className="text-2xl text-purple-300 font-cinzel">{cardContent.number || ""}</p>
+                    <p className="text-2xl text-purple-300">{cardContent.number || ""}</p>
                   </div>
                   
                   <p className="text-sm text-purple-200 mb-4">Keywords:</p>
@@ -124,7 +123,7 @@ const Tarot = () => {
               
               <h2 className="text-2xl font-bold text-white mb-4">{cardContent.name}</h2>
               
-              <div className="flex flex-wrap gap-3 justify-center mb-6">
+              <div className="flex flex-wrap gap-2 justify-center mb-6">
                 {cardContent.keywords.map((keyword: string, idx: number) => (
                   <Badge 
                     key={idx}
@@ -144,13 +143,15 @@ const Tarot = () => {
               
               <div className="space-y-6 text-gray-200">
                 <p className="leading-relaxed">
-                  {cardContent.name} strikes in your reading with its powerful symbolism and meaning. This card indicates 
-                  {cardContent.upright[0].toLowerCase()} in your current situation.
+                  {cardContent.name} strikes in your reading with its powerful symbolism and meaning. This powerful card indicates that structures in your life that have been built on shaky foundations—perhaps false beliefs, unsustainable situations, or inauthenticity—are due for dramatic dismantling.
                 </p>
                 
                 <p className="leading-relaxed">
-                  The energy of {cardContent.name} brings attention to {cardContent.upright[1].toLowerCase()}. 
-                  Consider how this might be manifesting in your life right now and what changes you might need to embrace.
+                  While {cardContent.name} experiences can feel shocking and disruptive, they ultimately serve to break through illusions and create space for more authentic rebuilding. The unexpected events associated with this card often initially appear as setbacks but ultimately lead to liberation from restrictive circumstances.
+                </p>
+                
+                <p className="leading-relaxed">
+                  {cardContent.name} encourages radical honesty with yourself about what isn't working in your life. Rather than clinging to the familiar, allow outmoded structures to fall away so that something more aligned with your true self can eventually be constructed. Remember that destruction precedes creation in many natural cycles.
                 </p>
                 
                 <div className="pt-4 border-t border-purple-500/20">
