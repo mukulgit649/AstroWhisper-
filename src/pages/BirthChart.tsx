@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import Navbar from '@/components/Navbar';
 import BackToHome from '@/components/BackToHome';
+import Footer from '@/components/Footer';
 import { useToast } from "@/components/ui/use-toast";
 
 const BirthChart = () => {
@@ -54,9 +55,9 @@ const BirthChart = () => {
   };
 
   return (
-    <div className="min-h-screen cosmic-bg">
+    <div className="min-h-screen cosmic-bg flex flex-col">
       <Navbar />
-      <div className="container mx-auto px-6 py-20 md:py-28 flex flex-col md:flex-row items-center justify-between gap-16">
+      <div className="container mx-auto px-6 py-20 md:py-28 flex flex-col md:flex-row items-center justify-between gap-16 flex-grow">
         {/* Left Column - Form */}
         <div className="w-full md:w-1/2 max-w-lg">
           <h2 className="text-4xl font-bold mb-14 font-unbounded text-white">Enter Your Details</h2>
@@ -161,6 +162,7 @@ const BirthChart = () => {
         </div>
       </div>
       <BackToHome />
+      <Footer />
     </div>
   );
 };

@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
@@ -96,6 +97,18 @@
   .loading-dot {
     @apply w-2 h-2 rounded-full bg-astro-violet;
     animation: loading-dot 1.4s infinite ease-in-out;
+  }
+  
+  /* Fix for input color visibility */
+  input[type="date"],
+  input[type="time"],
+  input[type="text"] {
+    color: white !important;
+  }
+  
+  input[type="date"]::-webkit-calendar-picker-indicator,
+  input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
   }
 }
 
