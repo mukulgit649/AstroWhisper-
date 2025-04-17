@@ -73,6 +73,7 @@ const BirthChart = () => {
                 className="w-full bg-navy-800/50 border-purple-500/20 text-white py-7 px-4 rounded-xl transition-all duration-300 hover:border-purple-500/50 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
                 placeholder="dd-mm-yyyy"
                 required
+                style={{ color: 'white' }}
               />
             </div>
 
@@ -86,6 +87,7 @@ const BirthChart = () => {
                 value={birthTime}
                 onChange={(e) => setBirthTime(e.target.value)}
                 className="w-full bg-navy-800/50 border-purple-500/20 text-white py-7 px-4 rounded-xl transition-all duration-300 hover:border-purple-500/50 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                style={{ color: 'white' }}
               />
               <p className="text-sm text-gray-400">For more accurate ascendant calculation</p>
             </div>
@@ -101,6 +103,7 @@ const BirthChart = () => {
                 onChange={(e) => setBirthPlace(e.target.value)}
                 className="w-full bg-navy-800/50 border-purple-500/20 text-white py-7 px-4 rounded-xl transition-all duration-300 hover:border-purple-500/50 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
                 placeholder="City, Country"
+                style={{ color: 'white' }}
               />
               <p className="text-sm text-gray-400">For house system calculations</p>
             </div>

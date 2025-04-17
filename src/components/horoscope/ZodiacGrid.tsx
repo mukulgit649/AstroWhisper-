@@ -10,7 +10,7 @@ const ZodiacGrid = ({ selectedSign, onSelectSign }: ZodiacGridProps) => {
   return (
     <div className="w-full bg-navy-900/80 p-6 rounded-2xl backdrop-blur-sm">
       <h2 className="text-2xl font-bold mb-6 text-white">Choose Your Sign</h2>
-      <div className="grid grid-cols-3 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 md:grid-cols-3 gap-4">
         {zodiacSigns.map((sign) => (
           <button
             key={sign.name}
