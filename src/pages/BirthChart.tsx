@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { MapPin, Clock, CalendarDays, Sparkles } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import Navbar from '@/components/Navbar';
 import BackToHome from '@/components/BackToHome';
-import Footer from '@/components/Footer';
 import { useToast } from "@/components/ui/use-toast";
 
 const BirthChart = () => {
@@ -162,7 +160,6 @@ const BirthChart = () => {
         </div>
       </div>
       <BackToHome />
-      <Footer />
     </div>
   );
 };

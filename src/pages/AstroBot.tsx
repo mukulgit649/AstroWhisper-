@@ -1,7 +1,6 @@
 
 import { AstroBotProvider } from '@/contexts/AstroBotContext';
 import AstroBotContainer from '@/components/astrobot/AstroBotContainer';
-import Footer from '@/components/Footer';
 import Stars from '@/components/Stars';
 import CosmicBackground from '@/components/CosmicBackground';
 
@@ -14,8 +13,6 @@ const AstroBot = () => {
       <AstroBotProvider>
         <AstroBotContainer />
       </AstroBotProvider>
-      
-      <Footer />
     </div>
   );
 };
