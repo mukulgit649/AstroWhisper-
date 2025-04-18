@@ -1,119 +1,94 @@
 
 import { Link } from 'react-router-dom';
-import { Instagram, Twitter, Facebook, Mail, Moon, Youtube, Linkedin, Github, Heart, CreditCard, Users, MapPin, Phone } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ChevronRight, Sun, MessageCircle, ScrollText, Book } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer className="bg-astro-navy/50 border-t border-white/5 py-16 mt-20">
-      <div className="container mx-auto px-4 md:px-6">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-4 lg:grid-cols-5">
-          <div className="md:col-span-2">
-            <Link to="/" className="flex items-center space-x-2 mb-4">
-              <Moon className="h-6 w-6 text-astro-glow" />
-              <span className="font-cinzel text-xl font-bold tracking-wider glow-text">
-                AstroWhisper
-              </span>
-            </Link>
-            <p className="text-sm text-foreground/70 mb-6 max-w-sm leading-relaxed">
-              Discover cosmic insights and mystical guidance through our AI-powered astrological tools and spiritual resources. Let the stars guide your journey.
-            </p>
-            <div className="flex space-x-4">
-              <a href="#" className="text-foreground/70 hover:text-astro-glow transition-colors duration-300">
-                <Instagram size={18} />
-              </a>
-              <a href="#" className="text-foreground/70 hover:text-astro-glow transition-colors duration-300">
-                <Twitter size={18} />
-              </a>
-              <a href="#" className="text-foreground/70 hover:text-astro-glow transition-colors duration-300">
-                <Facebook size={18} />
-              </a>
-              <a href="#" className="text-foreground/70 hover:text-astro-glow transition-colors duration-300">
-                <Youtube size={18} />
-              </a>
-              <a href="#" className="text-foreground/70 hover:text-astro-glow transition-colors duration-300">
-                <Linkedin size={18} />
-              </a>
-              <a href="#" className="text-foreground/70 hover:text-astro-glow transition-colors duration-300">
-                <Github size={18} />
-              </a>
-              <a href="#" className="text-foreground/70 hover:text-astro-glow transition-colors duration-300">
-                <Mail size={18} />
-              </a>
+    <footer className="w-full bg-transparent text-white py-16">
+      {/* Begin Your Cosmic Journey Section */}
+      <div className="container mx-auto px-6 mb-24">
+        <div className="text-center max-w-3xl mx-auto">
+          <div className="flex justify-center mb-6">
+            <div className="w-12 h-12 flex items-center justify-center">
+              <span className="text-3xl">✨</span>
             </div>
           </div>
-          
-          <div>
-            <h3 className="font-unbounded text-sm mb-4 text-foreground/90 uppercase tracking-wider">Features</h3>
-            <ul className="space-y-3 text-sm">
-              <li><Link to="/horoscope" className="text-foreground/70 hover:text-astro-glow transition-all duration-300 hover:translate-x-1 inline-block">Daily Horoscope</Link></li>
-              <li><Link to="/tarot" className="text-foreground/70 hover:text-astro-glow transition-all duration-300 hover:translate-x-1 inline-block">Tarot Reading</Link></li>
-              <li><Link to="/astrobot" className="text-foreground/70 hover:text-astro-glow transition-all duration-300 hover:translate-x-1 inline-block">Ask AstroBot</Link></li>
-              <li><Link to="/birthchart" className="text-foreground/70 hover:text-astro-glow transition-all duration-300 hover:translate-x-1 inline-block">Birth Chart</Link></li>
-              <li><Link to="/compatibility" className="text-foreground/70 hover:text-astro-glow transition-all duration-300 hover:translate-x-1 inline-block">Compatibility</Link></li>
-              <li><Link to="/transit" className="text-foreground/70 hover:text-astro-glow transition-all duration-300 hover:translate-x-1 inline-block">Transit Predictions</Link></li>
-            </ul>
-          </div>
-          
-          <div>
-            <h3 className="font-unbounded text-sm mb-4 text-foreground/90 uppercase tracking-wider">Resources</h3>
-            <ul className="space-y-3 text-sm">
-              <li><Link to="/learn" className="text-foreground/70 hover:text-astro-glow transition-all duration-300 hover:translate-x-1 inline-block">Learn Astrology</Link></li>
-              <li><Link to="/blog" className="text-foreground/70 hover:text-astro-glow transition-all duration-300 hover:translate-x-1 inline-block">Cosmic Blog</Link></li>
-              <li><Link to="/glossary" className="text-foreground/70 hover:text-astro-glow transition-all duration-300 hover:translate-x-1 inline-block">Astrology Glossary</Link></li>
-              <li><Link to="/faq" className="text-foreground/70 hover:text-astro-glow transition-all duration-300 hover:translate-x-1 inline-block">FAQ</Link></li>
-              <li><Link to="/guides" className="text-foreground/70 hover:text-astro-glow transition-all duration-300 hover:translate-x-1 inline-block">User Guides</Link></li>
-              <li><Link to="/support" className="text-foreground/70 hover:text-astro-glow transition-all duration-300 hover:translate-x-1 inline-block">Support Center</Link></li>
-            </ul>
-          </div>
-          
-          <div>
-            <h3 className="font-unbounded text-sm mb-4 text-foreground/90 uppercase tracking-wider">Company</h3>
-            <ul className="space-y-3 text-sm">
-              <li><Link to="/about" className="text-foreground/70 hover:text-astro-glow transition-all duration-300 hover:translate-x-1 inline-block">About Us</Link></li>
-              <li><Link to="/contact" className="text-foreground/70 hover:text-astro-glow transition-all duration-300 hover:translate-x-1 inline-block">Contact</Link></li>
-              <li><Link to="/careers" className="text-foreground/70 hover:text-astro-glow transition-all duration-300 hover:translate-x-1 inline-block">Careers</Link></li>
-              <li><Link to="/privacy" className="text-foreground/70 hover:text-astro-glow transition-all duration-300 hover:translate-x-1 inline-block">Privacy Policy</Link></li>
-              <li><Link to="/terms" className="text-foreground/70 hover:text-astro-glow transition-all duration-300 hover:translate-x-1 inline-block">Terms of Service</Link></li>
-              <li><Link to="/sitemap" className="text-foreground/70 hover:text-astro-glow transition-all duration-300 hover:translate-x-1 inline-block">Sitemap</Link></li>
-            </ul>
-          </div>
-        </div>
-        
-        <div className="border-t border-white/5 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8 mb-4 md:mb-0">
-            <div className="flex items-center">
-              <Phone size={14} className="mr-2 text-astro-glow/70" />
-              <span className="text-xs text-foreground/60">+1 (888) 123-4567</span>
-            </div>
-            <div className="flex items-center">
-              <Mail size={14} className="mr-2 text-astro-glow/70" />
-              <span className="text-xs text-foreground/60">contact@astrowhisper.com</span>
-            </div>
-            <div className="flex items-center">
-              <MapPin size={14} className="mr-2 text-astro-glow/70" />
-              <span className="text-xs text-foreground/60">123 Cosmic Way, Starfield, CA 90210</span>
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <a href="#" className="text-xs text-foreground/60 hover:text-foreground/80 transition-colors duration-300">
-              <CreditCard size={14} className="inline mr-1" /> Payment
-            </a>
-            <span className="text-foreground/60">•</span>
-            <a href="#" className="text-xs text-foreground/60 hover:text-foreground/80 transition-colors duration-300">
-              <Users size={14} className="inline mr-1" /> Affiliates
-            </a>
-            <span className="text-foreground/60">•</span>
-            <a href="#" className="text-xs text-foreground/60 hover:text-foreground/80 transition-colors duration-300">
-              <Heart size={14} className="inline mr-1" /> Donate
-            </a>
-          </div>
-        </div>
-        
-        <div className="mt-6 text-center">
-          <p className="text-xs text-foreground/50">
-            © {new Date().getFullYear()} AstroWhisper. All rights reserved. Powered by cosmic energy and advanced AI 🌌
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 font-cinzel text-white">
+            Begin Your Cosmic Journey Today
+          </h2>
+          <p className="text-lg md:text-xl text-gray-300 mb-8">
+            Sign up now to unlock premium astrological insights, save your readings,
+            and receive personalized celestial guidance tailored to your unique birth chart.
           </p>
+          <Button 
+            variant="default"
+            className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-6 h-auto text-lg rounded-full"
+          >
+            Create Free Account
+          </Button>
+        </div>
+      </div>
+
+      {/* Cosmic Services Section */}
+      <div className="container mx-auto px-6 mb-24">
+        <h2 className="text-4xl font-bold text-center mb-6 font-cinzel">Cosmic Services</h2>
+        <p className="text-center text-gray-300 text-lg mb-12 max-w-2xl mx-auto">
+          Explore our mystical AI-powered tools to gain insight into your past, present, and future.
+        </p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <Link to="/horoscope" className="group p-6 rounded-xl bg-navy-900/50 hover:bg-navy-900/70 transition-all">
+            <div className="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-purple-900/30">
+              <Sun className="w-6 h-6 text-purple-400" />
+            </div>
+            <h3 className="text-xl font-semibold mb-3">Daily Horoscope</h3>
+            <p className="text-gray-400 mb-4">
+              Receive personalized daily guidance based on your zodiac sign and planetary alignments.
+            </p>
+            <span className="text-purple-400 group-hover:text-purple-300 flex items-center">
+              Read today's stars <ChevronRight className="ml-2" />
+            </span>
+          </Link>
+
+          <Link to="/tarot" className="group p-6 rounded-xl bg-navy-900/50 hover:bg-navy-900/70 transition-all">
+            <div className="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-purple-900/30">
+              <ScrollText className="w-6 h-6 text-purple-400" />
+            </div>
+            <h3 className="text-xl font-semibold mb-3">Tarot Reading</h3>
+            <p className="text-gray-400 mb-4">
+              Draw virtual tarot cards with AI-generated interpretations tailored to your spiritual journey.
+            </p>
+            <span className="text-purple-400 group-hover:text-purple-300 flex items-center">
+              Pull your cards <ChevronRight className="ml-2" />
+            </span>
+          </Link>
+
+          <Link to="/astrobot" className="group p-6 rounded-xl bg-navy-900/50 hover:bg-navy-900/70 transition-all">
+            <div className="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-purple-900/30">
+              <MessageCircle className="w-6 h-6 text-purple-400" />
+            </div>
+            <h3 className="text-xl font-semibold mb-3">Ask AstroBot</h3>
+            <p className="text-gray-400 mb-4">
+              Chat with our mystical AI companion for personalized guidance on life's burning questions.
+            </p>
+            <span className="text-purple-400 group-hover:text-purple-300 flex items-center">
+              Start chatting <ChevronRight className="ml-2" />
+            </span>
+          </Link>
+
+          <Link to="/birthchart" className="group p-6 rounded-xl bg-navy-900/50 hover:bg-navy-900/70 transition-all">
+            <div className="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-purple-900/30">
+              <Book className="w-6 h-6 text-purple-400" />
+            </div>
+            <h3 className="text-xl font-semibold mb-3">Birth Chart</h3>
+            <p className="text-gray-400 mb-4">
+              Generate your complete astrological blueprint based on your exact birth time and location.
+            </p>
+            <span className="text-purple-400 group-hover:text-purple-300 flex items-center">
+              Map your stars <ChevronRight className="ml-2" />
+            </span>
+          </Link>
         </div>
       </div>
     </footer>

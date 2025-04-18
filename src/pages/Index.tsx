@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, Moon, Sun, MessageCircle, Sparkles, Star, Map } from 'lucide-react';
+import { ChevronRight, Moon, Sun, MessageCircle, Sparkles, Star, Map, Heart, BookOpen } from 'lucide-react';
 import Footer from '@/components/Footer';
 import Navbar from '@/components/Navbar';
 
@@ -121,7 +121,9 @@ const Index = () => {
               <p className="text-gray-300">Discover your unique cosmic blueprint.</p>
             </Link>
             <Link to="/compatibility" className="glass-card p-6 hover:scale-105">
-              <Heart className="w-10 h-10 text-red-400 mb-4" />
+              <div className="text-red-400 mb-4">
+                <Heart className="w-10 h-10" />
+              </div>
               <h3 className="text-xl font-semibold text-white">Compatibility</h3>
               <p className="text-gray-300">Find out how compatible you are with others.</p>
             </Link>
@@ -131,7 +133,9 @@ const Index = () => {
               <p className="text-gray-300">Plan your future with astrological insights.</p>
             </Link>
             <Link to="/learn" className="glass-card p-6 hover:scale-105">
-              <BookOpen className="w-10 h-10 text-green-400 mb-4" />
+              <div className="text-green-400 mb-4">
+                <BookOpen className="w-10 h-10" />
+              </div>
               <h3 className="text-xl font-semibold text-white">Learn Astrology</h3>
               <p className="text-gray-300">Expand your knowledge of the stars.</p>
             </Link>
@@ -145,11 +149,3 @@ const Index = () => {
 };
 
 export default Index;
-
-const Heart = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-heart"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3.5c-1.71 0-3 1.02-3.5 2.14C12.5 4.52 11 3.5 9.5 3.5A5.5 5.5 0 0 0 4 8.5c0 2.29 1.51 4.04 3 5.5L12 21l7-7Z"/></svg>
-);
-
-const BookOpen = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-book-open"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-);
