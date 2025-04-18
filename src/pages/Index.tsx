@@ -1,7 +1,7 @@
+
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, Moon, Sun, MessageCircle, Sparkles, Star, Map, Heart, BookOpen } from 'lucide-react';
-import Footer from '@/components/Footer';
+import { ChevronRight, Moon, Sun, MessageCircle, Sparkles, Book } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 
 const Index = () => {
@@ -16,30 +16,11 @@ const Index = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
-  const testimonials = [
-    {
-      id: 1,
-      name: 'Anya Sharma',
-      text: "AstroWhisper's daily horoscopes are spot on! They've given me clarity and guidance in my daily life.",
-      image: 'https://images.unsplash.com/photo-1599507348368-399994a19997?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fHdvbWFuJTIwcG9ydHJhaXR8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=500&q=60',
-    },
-    {
-      id: 2,
-      name: 'Raj Patel',
-      text: 'The AstroBot is incredibly helpful! I asked about my career, and the insights were surprisingly accurate and actionable.',
-      image: 'https://images.unsplash.com/photo-1544005313-943cb025c0e7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fG1hbiUyMHBvcnRyYWl0fGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60',
-    },
-    {
-      id: 3,
-      name: 'Emily Chen',
-      text: 'I love the tarot readings! They provide a unique perspective and have helped me understand my relationships better.',
-      image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTd8fHdvbWFuJTIwcG9ydHJhaXR8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=500&q=60',
-    },
-  ];
-
   return (
     <div className="cosmic-bg flex flex-col min-h-screen">
       <Navbar />
+
+      {/* Hero Section */}
       <section className="py-24 md:py-32 px-6">
         <div className="container mx-auto text-center">
           <div className="flex justify-center mb-10">
@@ -64,86 +45,63 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Services Grid Section */}
       <section className="py-24 md:py-32 px-6 bg-astro-navy/30">
-        <div className="container mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Link to="/horoscope" className="glass-card p-6 hover:scale-105">
-              <div className="flex items-center space-x-4 mb-4">
-                <Sun className="w-8 h-8 text-yellow-400" />
-                <h3 className="text-xl font-semibold text-white">Daily Horoscopes</h3>
-              </div>
-              <p className="text-gray-300">Get personalized insights into your day based on your zodiac sign.</p>
-            </Link>
-            <Link to="/tarot" className="glass-card p-6 hover:scale-105">
-              <div className="flex items-center space-x-4 mb-4">
-                <Sparkles className="w-8 h-8 text-purple-400" />
-                <h3 className="text-xl font-semibold text-white">Tarot Readings</h3>
-              </div>
-              <p className="text-gray-300">Unlock hidden truths and guidance with a personalized tarot card reading.</p>
-            </Link>
-            <Link to="/astrobot" className="glass-card p-6 hover:scale-105">
-              <div className="flex items-center space-x-4 mb-4">
-                <MessageCircle className="w-8 h-8 text-blue-400" />
-                <h3 className="text-xl font-semibold text-white">Ask AstroBot</h3>
-              </div>
-              <p className="text-gray-300">Get instant answers to your burning questions with our AI-powered astrologer.</p>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-24 md:py-32 px-6">
         <div className="container mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-12 font-unbounded text-white">
-            What Our Users Are Saying
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial) => (
-              <div key={testimonial.id} className="glass-card p-6">
-                <img src={testimonial.image} alt={testimonial.name} className="w-20 h-20 rounded-full mx-auto mb-4" />
-                <h4 className="text-lg font-semibold text-white">{testimonial.name}</h4>
-                <p className="text-gray-300 italic mt-2">"{testimonial.text}"</p>
-              </div>
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 font-cinzel">Cosmic Services</h2>
+          <p className="text-center text-gray-300 text-lg mb-12 max-w-2xl mx-auto">
+            Explore our mystical AI-powered tools to gain insight into your past, present, and future.
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              {
+                icon: <Sun className="w-6 h-6 text-purple-400" />,
+                title: "Daily Horoscope",
+                description: "Receive personalized daily guidance based on your zodiac sign and planetary alignments.",
+                link: "/horoscope",
+                cta: "Read today's stars"
+              },
+              {
+                icon: <Book className="w-6 h-6 text-purple-400" />,
+                title: "Tarot Reading",
+                description: "Draw virtual tarot cards with AI-generated interpretations tailored to your spiritual journey.",
+                link: "/tarot",
+                cta: "Pull your cards"
+              },
+              {
+                icon: <MessageCircle className="w-6 h-6 text-purple-400" />,
+                title: "Ask AstroBot",
+                description: "Chat with our mystical AI companion for personalized guidance on life's burning questions.",
+                link: "/astrobot",
+                cta: "Start chatting"
+              },
+              {
+                icon: <Sparkles className="w-6 h-6 text-purple-400" />,
+                title: "Birth Chart",
+                description: "Generate your complete astrological blueprint based on your exact birth time and location.",
+                link: "/birthchart",
+                cta: "Map your stars"
+              }
+            ].map((service, index) => (
+              <Link
+                key={index}
+                to={service.link}
+                className="group p-6 rounded-xl bg-navy-900/50 hover:bg-navy-900/70 transition-all"
+              >
+                <div className="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-purple-900/30">
+                  {service.icon}
+                </div>
+                <h3 className="text-xl font-semibold mb-3">{service.title}</h3>
+                <p className="text-gray-400 mb-4">{service.description}</p>
+                <span className="text-purple-400 group-hover:text-purple-300 flex items-center">
+                  {service.cta} <ChevronRight className="ml-2" />
+                </span>
+              </Link>
             ))}
           </div>
         </div>
       </section>
-
-      <section className="py-24 md:py-32 px-6 bg-astro-navy/30">
-        <div className="container mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-12 font-unbounded text-white">
-            Explore the Cosmos
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <Link to="/birthchart" className="glass-card p-6 hover:scale-105">
-              <Star className="w-10 h-10 text-yellow-400 mb-4" />
-              <h3 className="text-xl font-semibold text-white">Birth Charts</h3>
-              <p className="text-gray-300">Discover your unique cosmic blueprint.</p>
-            </Link>
-            <Link to="/compatibility" className="glass-card p-6 hover:scale-105">
-              <div className="text-red-400 mb-4">
-                <Heart className="w-10 h-10" />
-              </div>
-              <h3 className="text-xl font-semibold text-white">Compatibility</h3>
-              <p className="text-gray-300">Find out how compatible you are with others.</p>
-            </Link>
-            <Link to="/transit" className="glass-card p-6 hover:scale-105">
-              <Map className="w-10 h-10 text-blue-400 mb-4" />
-              <h3 className="text-xl font-semibold text-white">Transit Forecast</h3>
-              <p className="text-gray-300">Plan your future with astrological insights.</p>
-            </Link>
-            <Link to="/learn" className="glass-card p-6 hover:scale-105">
-              <div className="text-green-400 mb-4">
-                <BookOpen className="w-10 h-10" />
-              </div>
-              <h3 className="text-xl font-semibold text-white">Learn Astrology</h3>
-              <p className="text-gray-300">Expand your knowledge of the stars.</p>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <Footer />
     </div>
   );
 };
