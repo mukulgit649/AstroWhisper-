@@ -19,6 +19,22 @@ const Index = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
+  // Zodiac signs for the wheel
+  const zodiacSigns = [
+    { symbol: "♈", name: "Aries" },
+    { symbol: "♉", name: "Taurus" },
+    { symbol: "♊", name: "Gemini" },
+    { symbol: "♋", name: "Cancer" },
+    { symbol: "♌", name: "Leo" },
+    { symbol: "♍", name: "Virgo" },
+    { symbol: "♎", name: "Libra" },
+    { symbol: "♏", name: "Scorpio" },
+    { symbol: "♐", name: "Sagittarius" },
+    { symbol: "♑", name: "Capricorn" },
+    { symbol: "♒", name: "Aquarius" },
+    { symbol: "♓", name: "Pisces" }
+  ];
+
   return (
     <div className="cosmic-bg flex flex-col min-h-screen">
       <Stars count={150} />
@@ -45,68 +61,41 @@ const Index = () => {
             </div>
           </div>
           <div className="w-full md:w-1/2 flex justify-center md:justify-end">
+            {/* Updated Zodiac Wheel */}
             <div className="relative w-80 h-80 md:w-[450px] md:h-[450px]">
-              <div className="absolute inset-0 rounded-full border-2 border-purple-500/20 animate-pulse-glow"></div>
-              <div className="absolute inset-4 rounded-full border-2 border-purple-500/30"></div>
-              <div className="absolute inset-8 rounded-full border-2 border-purple-500/40"></div>
+              {/* Outer ring */}
+              <div className="absolute inset-0 rounded-full border border-purple-500/20"></div>
+              {/* Middle ring */}
+              <div className="absolute inset-8 rounded-full border border-purple-500/30"></div>
+              {/* Inner ring */}
+              <div className="absolute inset-16 rounded-full border border-purple-500/40"></div>
               
               {/* Zodiac Signs Positioned Around the Circle */}
               <div className="absolute inset-0 animate-rotate-slow">
-                {/* Aries */}
-                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                  <div className="w-10 h-10 rounded-full bg-navy-900/80 flex items-center justify-center border border-purple-500/30">
-                    <span className="text-purple-400 text-xl">♈</span>
-                  </div>
-                </div>
-                
-                {/* Taurus */}
-                <div className="absolute top-[15%] right-[15%] transform translate-x-1/3">
-                  <div className="w-10 h-10 rounded-full bg-navy-900/80 flex items-center justify-center border border-purple-500/30">
-                    <span className="text-purple-400 text-xl">♉</span>
-                  </div>
-                </div>
-                
-                {/* Gemini */}
-                <div className="absolute top-1/2 right-0 transform translate-x-1/2 -translate-y-1/2">
-                  <div className="w-10 h-10 rounded-full bg-navy-900/80 flex items-center justify-center border border-purple-500/30">
-                    <span className="text-purple-400 text-xl">♊</span>
-                  </div>
-                </div>
-                
-                {/* Cancer */}
-                <div className="absolute bottom-[15%] right-[15%] transform translate-x-1/3">
-                  <div className="w-10 h-10 rounded-full bg-navy-900/80 flex items-center justify-center border border-purple-500/30">
-                    <span className="text-purple-400 text-xl">♋</span>
-                  </div>
-                </div>
-                
-                {/* Leo */}
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2">
-                  <div className="w-10 h-10 rounded-full bg-navy-900/80 flex items-center justify-center border border-purple-500/30">
-                    <span className="text-purple-400 text-xl">♌</span>
-                  </div>
-                </div>
-                
-                {/* Virgo */}
-                <div className="absolute bottom-[15%] left-[15%] transform -translate-x-1/3">
-                  <div className="w-10 h-10 rounded-full bg-navy-900/80 flex items-center justify-center border border-purple-500/30">
-                    <span className="text-purple-400 text-xl">♍</span>
-                  </div>
-                </div>
-                
-                {/* Libra */}
-                <div className="absolute top-1/2 left-0 transform -translate-x-1/2 -translate-y-1/2">
-                  <div className="w-10 h-10 rounded-full bg-navy-900/80 flex items-center justify-center border border-purple-500/30">
-                    <span className="text-purple-400 text-xl">♎</span>
-                  </div>
-                </div>
-                
-                {/* Scorpio */}
-                <div className="absolute top-[15%] left-[15%] transform -translate-x-1/3">
-                  <div className="w-10 h-10 rounded-full bg-navy-900/80 flex items-center justify-center border border-purple-500/30">
-                    <span className="text-purple-400 text-xl">♏</span>
-                  </div>
-                </div>
+                {zodiacSigns.map((sign, index) => {
+                  const angle = (index * 30) * Math.PI / 180;
+                  const radius = 200; // Adjust based on your container size
+                  const x = Math.cos(angle) * radius;
+                  const y = Math.sin(angle) * radius;
+                  // Calculate position as percentage of container
+                  const top = 50 + (y / radius) * 40;
+                  const left = 50 + (x / radius) * 40;
+                  
+                  return (
+                    <div 
+                      key={sign.name}
+                      className="absolute transform -translate-x-1/2 -translate-y-1/2"
+                      style={{ 
+                        top: `${top}%`, 
+                        left: `${left}%` 
+                      }}
+                    >
+                      <div className="w-10 h-10 rounded-full bg-navy-900/80 backdrop-blur-sm flex items-center justify-center border border-purple-500/50 shadow-[0_0_10px_rgba(159,68,211,0.3)]">
+                        <span className="text-purple-400 text-xl">{sign.symbol}</span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
               
               {/* Center Gemini Icon */}
