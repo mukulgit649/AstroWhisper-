@@ -9,11 +9,21 @@ import { Card } from '@/components/ui/card';
 
 const Index = () => {
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
+  const [currentZodiacIndex, setCurrentZodiacIndex] = useState(0);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    // Change the center zodiac sign every 3 seconds
+    const interval = setInterval(() => {
+      setCurrentZodiacIndex((prevIndex) => (prevIndex + 1) % zodiacSigns.length);
+    }, 3000);
+    
+    return () => clearInterval(interval);
+  }, []);
 
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
@@ -44,17 +54,17 @@ const Index = () => {
       <section className="py-24 md:py-32 px-6 relative">
         <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-10">
           <div className="w-full md:w-1/2 text-center md:text-left">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 font-unbounded text-white leading-tight">
+            <h1 className="text-5xl md:text-6xl font-bold mb-6 font-cinzel text-white leading-tight">
               Discover Your<br />Cosmic Guidance
             </h1>
-            <p className="text-xl text-gray-300 leading-relaxed mb-10 max-w-lg">
+            <p className="text-xl font-cormorant text-gray-300 leading-relaxed mb-10 max-w-lg">
               Unlock the mysteries of the universe with AI-powered astrological insights, tarot readings, and personalized guidance.
             </p>
             <div className="flex flex-col md:flex-row gap-5 justify-center md:justify-start">
-              <Link to="/birthchart" className="bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-full px-8 py-3 transition-all duration-300 hover:shadow-[0_0_20px_rgba(159,68,211,0.8)] flex items-center justify-center">
+              <Link to="/birthchart" className="bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-full px-8 py-3 transition-all duration-300 hover:shadow-[0_0_20px_rgba(159,68,211,0.8)] flex items-center justify-center font-cinzel">
                 Explore Your Stars
               </Link>
-              <Link to="/horoscope" className="bg-transparent text-white border border-purple-500/50 rounded-full px-8 py-3 hover:bg-purple-500/10 transition-all duration-300 flex items-center justify-center">
+              <Link to="/horoscope" className="bg-transparent text-white border border-purple-500/50 rounded-full px-8 py-3 hover:bg-purple-500/10 transition-all duration-300 flex items-center justify-center font-cinzel">
                 <Moon className="mr-2 h-5 w-5" />
                 Today's Horoscope
               </Link>
@@ -64,11 +74,11 @@ const Index = () => {
             {/* Updated Zodiac Wheel */}
             <div className="relative w-80 h-80 md:w-[450px] md:h-[450px]">
               {/* Outer ring */}
-              <div className="absolute inset-0 rounded-full border border-purple-500/20"></div>
+              <div className="absolute inset-0 rounded-full border-2 border-purple-500/40"></div>
               {/* Middle ring */}
-              <div className="absolute inset-8 rounded-full border border-purple-500/30"></div>
+              <div className="absolute inset-8 rounded-full border border-purple-500/50"></div>
               {/* Inner ring */}
-              <div className="absolute inset-16 rounded-full border border-purple-500/40"></div>
+              <div className="absolute inset-16 rounded-full border border-purple-500/60"></div>
               
               {/* Zodiac Signs Positioned Around the Circle */}
               <div className="absolute inset-0 animate-rotate-slow">
@@ -90,18 +100,20 @@ const Index = () => {
                         left: `${left}%` 
                       }}
                     >
-                      <div className="w-10 h-10 rounded-full bg-navy-900/80 backdrop-blur-sm flex items-center justify-center border border-purple-500/50 shadow-[0_0_10px_rgba(159,68,211,0.3)]">
-                        <span className="text-purple-400 text-xl">{sign.symbol}</span>
+                      <div className="w-12 h-12 rounded-full bg-navy-900/80 backdrop-blur-sm flex items-center justify-center border border-purple-500/70 shadow-[0_0_15px_rgba(159,68,211,0.5)]">
+                        <span className="text-astro-glow text-2xl">{sign.symbol}</span>
                       </div>
                     </div>
                   );
                 })}
               </div>
               
-              {/* Center Gemini Icon */}
+              {/* Center Zodiac Icon - Changes periodically */}
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-32 h-32 rounded-full bg-purple-600 flex items-center justify-center shadow-[0_0_30px_rgba(159,68,211,0.6)]">
-                  <span className="text-white text-5xl">♊</span>
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-astro-purple to-astro-violet flex items-center justify-center shadow-[0_0_30px_rgba(159,68,211,0.8)] transition-all duration-1000 ease-in-out">
+                  <span className="text-white text-5xl transition-opacity duration-500">
+                    {zodiacSigns[currentZodiacIndex].symbol}
+                  </span>
                 </div>
               </div>
             </div>
@@ -113,35 +125,35 @@ const Index = () => {
       <section className="py-20 px-6 bg-astro-navy/30">
         <div className="container mx-auto">
           <h2 className="text-4xl font-bold text-center mb-3 font-cinzel text-white">Cosmic Services</h2>
-          <p className="text-center text-gray-300 text-lg mb-16 max-w-2xl mx-auto">
+          <p className="text-center text-gray-300 text-lg mb-16 max-w-2xl mx-auto font-cormorant">
             Explore our mystical AI-powered tools to gain insight into your past, present, and future.
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
               {
-                icon: <Sun className="w-10 h-10 text-purple-400" />,
+                icon: <Sun className="w-10 h-10 text-astro-glow" />,
                 title: "Daily Horoscope",
                 description: "Receive personalized daily guidance based on your zodiac sign and planetary alignments.",
                 link: "/horoscope",
                 cta: "Read today's stars"
               },
               {
-                icon: <Book className="w-10 h-10 text-purple-400" />,
+                icon: <Book className="w-10 h-10 text-astro-glow" />,
                 title: "Tarot Reading",
                 description: "Draw virtual tarot cards with AI-generated interpretations tailored to your spiritual journey.",
                 link: "/tarot",
                 cta: "Pull your cards"
               },
               {
-                icon: <MessageCircle className="w-10 h-10 text-purple-400" />,
+                icon: <MessageCircle className="w-10 h-10 text-astro-glow" />,
                 title: "Ask AstroBot",
                 description: "Chat with our mystical AI companion for personalized guidance on life's burning questions.",
                 link: "/astrobot",
                 cta: "Start chatting"
               },
               {
-                icon: <Sparkles className="w-10 h-10 text-purple-400" />,
+                icon: <Sparkles className="w-10 h-10 text-astro-glow" />,
                 title: "Birth Chart",
                 description: "Generate your complete astrological blueprint based on your exact birth time and location.",
                 link: "/birthchart",
@@ -151,14 +163,14 @@ const Index = () => {
               <Link
                 key={index}
                 to={service.link}
-                className="group p-8 rounded-xl bg-navy-900/50 hover:bg-navy-900/70 border border-purple-500/20 hover:border-purple-500/50 transition-all duration-300 hover:shadow-[0_0_15px_rgba(159,68,211,0.3)]"
+                className="group p-8 rounded-xl bg-navy-900/50 hover:bg-navy-900/70 border border-purple-500/30 hover:border-purple-500/70 transition-all duration-300 hover:shadow-[0_0_20px_rgba(159,68,211,0.4)]"
               >
-                <div className="flex items-center justify-center w-16 h-16 mb-6 rounded-full bg-purple-900/30">
+                <div className="flex items-center justify-center w-16 h-16 mb-6 rounded-full bg-purple-900/40 border border-purple-500/30">
                   {service.icon}
                 </div>
-                <h3 className="text-2xl font-semibold mb-4 text-white">{service.title}</h3>
-                <p className="text-gray-300 mb-6">{service.description}</p>
-                <span className="text-purple-400 group-hover:text-purple-300 flex items-center">
+                <h3 className="text-2xl font-semibold mb-4 text-white font-cinzel">{service.title}</h3>
+                <p className="text-gray-300 mb-6 font-cormorant text-lg">{service.description}</p>
+                <span className="text-astro-glow group-hover:text-astro-lilac flex items-center font-cinzel">
                   {service.cta} <ChevronRight className="ml-2" />
                 </span>
               </Link>
