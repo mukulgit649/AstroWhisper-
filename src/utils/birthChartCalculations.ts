@@ -1,4 +1,3 @@
-
 export interface PlanetPosition {
   sign: string;
   degree: number;
@@ -10,12 +9,12 @@ export interface PlanetaryPositions {
   mercury: PlanetPosition;
   venus: PlanetPosition;
   mars: PlanetPosition;
-  jupiter?: PlanetPosition;
-  saturn?: PlanetPosition;
-  uranus?: PlanetPosition;
-  neptune?: PlanetPosition;
-  pluto?: PlanetPosition;
-  ascendant?: PlanetPosition;
+  jupiter: PlanetPosition;
+  saturn: PlanetPosition;
+  uranus: PlanetPosition;
+  neptune: PlanetPosition;
+  pluto: PlanetPosition;
+  ascendant: PlanetPosition;
 }
 
 export interface PersonalizedReading {
@@ -54,6 +53,9 @@ export const calculatePlanetaryPositions = (birthDate: Date, birthTime: string, 
     mars: { sign: getZodiacSign(6), degree: getDegree(5) },
     jupiter: { sign: getZodiacSign(8), degree: getDegree(9) },
     saturn: { sign: getZodiacSign(10), degree: getDegree(25) },
+    uranus: { sign: getZodiacSign(11), degree: getDegree(11) },
+    neptune: { sign: getZodiacSign(12), degree: getDegree(13) },
+    pluto: { sign: getZodiacSign(13), degree: getDegree(15) },
     ascendant: { sign: getZodiacSign(birthTime.length), degree: getDegree(3) },
   };
 };

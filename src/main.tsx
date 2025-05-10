@@ -1,8 +1,9 @@
-
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import './styles/perspective.css'
+import { Route } from 'react-router-dom'
+import LearnAstrology from './pages/LearnAstrology'
 
 // Add custom animations to the global CSS
 const customStyles = document.createElement('style');

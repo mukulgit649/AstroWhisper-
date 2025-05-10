@@ -1,5 +1,4 @@
-
-import { Moon, User } from 'lucide-react';
+import { Moon, User, Volume2 } from 'lucide-react';
 import { Message } from '@/contexts/AstroBotContext';
 
 interface ChatMessageProps {
@@ -9,6 +8,17 @@ interface ChatMessageProps {
 const ChatMessage = ({ message }: ChatMessageProps) => {
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  // Text-to-speech handler
+  const handleListen = () => {
+    if (!('speechSynthesis' in window)) {
+      alert('Sorry, your browser does not support text-to-speech.');
+      return;
+    }
+    const utterance = new window.SpeechSynthesisUtterance(message.content);
+    utterance.lang = 'en-US';
+    window.speechSynthesis.speak(utterance);
   };
 
   return (
@@ -37,6 +47,18 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
           <div className="text-xs text-foreground/50">
             {message.role === 'user' ? 'You' : 'AstroBot'} • {formatTime(message.timestamp)}
           </div>
+          {/* Listen button for assistant messages */}
+          {message.role === 'assistant' && (
+            <button
+              onClick={handleListen}
+              className="ml-2 p-1 rounded-full hover:bg-astro-violet/20 transition-colors"
+              title="Listen to this message"
+              aria-label="Listen to this message"
+              type="button"
+            >
+              <Volume2 className="w-4 h-4 text-astro-violet" />
+            </button>
+          )}
         </div>
         <div className="text-sm whitespace-pre-wrap">{message.content}</div>
       </div>

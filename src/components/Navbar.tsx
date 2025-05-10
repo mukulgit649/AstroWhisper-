@@ -1,13 +1,22 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, X, Moon } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from '@/hooks/use-mobile';
+import { auth } from '@/firebase';
+import { signInWithGoogle, signOutUser } from '@/utils/firebaseAuth';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const isMobile = useIsMobile();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -18,6 +27,7 @@ const Navbar = () => {
     { name: 'Tarot Reading', path: '/tarot' },
     { name: 'Ask AstroBot', path: '/astrobot' },
     { name: 'Birth Chart', path: '/birthchart' },
+    { name: 'Learn Astrology', path: '/learn' },
   ];
 
   return (
@@ -48,15 +58,28 @@ const Navbar = () => {
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
-            <Button 
-              variant="outline" 
-              className="border-astro-purple/50 hover:bg-astro-purple/10 transition-all duration-300 hover:scale-105"
-            >
-              Sign In
-            </Button>
-            <Button className="glow-btn transition-transform duration-300 hover:scale-105">
-              Get Started
-            </Button>
+            {!user ? (
+              <Button 
+                variant="outline" 
+                className="border-astro-purple/50 hover:bg-astro-purple/10 transition-all duration-300 hover:scale-105"
+                onClick={signInWithGoogle}
+              >
+                Sign in with Google
+              </Button>
+            ) : (
+              <>
+                <span className="text-white font-cinzel mr-2 flex items-center gap-2">
+                  {user.photoURL && <img src={user.photoURL} alt="avatar" className="w-7 h-7 rounded-full inline-block" />} {user.displayName}
+                </span>
+                <Button 
+                  variant="outline" 
+                  className="border-astro-purple/50 hover:bg-astro-purple/10 transition-all duration-300 hover:scale-105"
+                  onClick={signOutUser}
+                >
+                  Sign Out
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -91,15 +114,28 @@ const Navbar = () => {
             </Link>
           ))}
           <div className="flex flex-col space-y-3 pt-4 border-t border-white/10">
-            <Button 
-              variant="outline" 
-              className="border-astro-purple/50 hover:bg-astro-purple/10 w-full transition-all duration-300 hover:scale-[1.02]"
-            >
-              Sign In
-            </Button>
-            <Button className="glow-btn w-full transition-all duration-300 hover:scale-[1.02]">
-              Get Started
-            </Button>
+            {!user ? (
+              <Button 
+                variant="outline" 
+                className="border-astro-purple/50 hover:bg-astro-purple/10 w-full transition-all duration-300 hover:scale-[1.02]"
+                onClick={signInWithGoogle}
+              >
+                Sign in with Google
+              </Button>
+            ) : (
+              <>
+                <span className="text-white font-cinzel flex items-center gap-2 justify-center">
+                  {user.photoURL && <img src={user.photoURL} alt="avatar" className="w-7 h-7 rounded-full inline-block" />} {user.displayName}
+                </span>
+                <Button 
+                  variant="outline" 
+                  className="border-astro-purple/50 hover:bg-astro-purple/10 w-full transition-all duration-300 hover:scale-[1.02]"
+                  onClick={signOutUser}
+                >
+                  Sign Out
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>

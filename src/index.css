@@ -112,6 +112,37 @@
   input[type="time"]::-webkit-calendar-picker-indicator {
     filter: invert(1);
   }
+
+  /* Force dark background and white text for all input fields */
+  input[type="date"],
+  input[type="time"],
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"] {
+    background-color: #18181b !important;
+    color: #fff !important;
+  }
+
+  /* Autofill fix for Chrome */
+  input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px #18181b inset !important;
+    -webkit-text-fill-color: #fff !important;
+    caret-color: #fff !important;
+  }
+
+  input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px #18181b inset !important;
+    -webkit-text-fill-color: #fff !important;
+  }
+
+  input::placeholder {
+    color: #b3b3b3 !important;
+    opacity: 1;
+  }
 }
 
 @keyframes loading-dot {

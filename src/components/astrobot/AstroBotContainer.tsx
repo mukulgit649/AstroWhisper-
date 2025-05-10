@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAstroBot } from '@/contexts/AstroBotContext';
 import CosmicInsightsSidebar from '@/components/astrobot/CosmicInsightsSidebar';
@@ -49,7 +48,7 @@ const AstroBotContainer = () => {
           fadeInLoaded={fadeInLoaded}
         />
         
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {/* Sidebar */}
             <div className="md:col-span-1 order-2 md:order-1">

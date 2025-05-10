@@ -1,4 +1,3 @@
-
 import { zodiacSigns } from "@/utils/zodiacData";
 
 interface ZodiacGridProps {
@@ -7,6 +6,12 @@ interface ZodiacGridProps {
 }
 
 const ZodiacGrid = ({ selectedSign, onSelectSign }: ZodiacGridProps) => {
+  const playChime = () => {
+    const audio = new Audio('/sounds/celestial-chime.mp3');
+    audio.volume = 0.3;
+    audio.play();
+  };
+
   return (
     <div className="w-full bg-navy-900/80 p-6 rounded-2xl backdrop-blur-sm">
       <h2 className="text-2xl font-bold mb-6 text-white">Choose Your Sign</h2>
@@ -14,7 +19,10 @@ const ZodiacGrid = ({ selectedSign, onSelectSign }: ZodiacGridProps) => {
         {zodiacSigns.map((sign) => (
           <button
             key={sign.name}
-            onClick={() => onSelectSign(sign.name)}
+            onClick={() => {
+              playChime();
+              onSelectSign(sign.name);
+            }}
             className={`relative flex flex-col items-center justify-center p-4 rounded-xl transition-all duration-300 ${
               selectedSign === sign.name
                 ? 'bg-purple-600 shadow-[0_0_20px_rgba(147,51,234,0.5)]'

@@ -1,9 +1,9 @@
-
 import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
-import { getMockBotResponse } from '@/utils/mockAiResponses';
+import { getMockHoroscopeReading } from '@/utils/mockAiResponses';
 import { getZodiacSign, getZodiacData } from '@/utils/zodiacData';
 import { getCardByName } from '@/utils/tarotData';
 import { calculatePlanetaryPositions, getPersonalizedReading, type PlanetaryPositions } from '@/utils/birthChartCalculations';
+import { getGeminiResponse } from '@/utils/geminiApi';
 
 export interface Message {
   id: string;
@@ -17,6 +17,8 @@ interface AstroBotContextType {
   isLoading: boolean;
   sendMessage: (content: string) => Promise<void>;
   clearMessages: () => void;
+  userProfile: UserProfile;
+  setUserProfile: React.Dispatch<React.SetStateAction<UserProfile>>;
 }
 
 interface UserProfile {
@@ -118,6 +120,28 @@ export const AstroBotProvider = ({ children }: { children: ReactNode }) => {
       });
     }
   }, []);
+
+  // Proactive daily greeting logic
+  useEffect(() => {
+    if (userProfile.zodiacSign) {
+      const today = new Date().toDateString();
+      const lastGreeted = localStorage.getItem('astrobot-last-greeted');
+      if (lastGreeted !== today) {
+        const signName = userProfile.zodiacSign.charAt(0).toUpperCase() + userProfile.zodiacSign.slice(1);
+        const greeting = `Good day${userProfile.name ? ', ' + userProfile.name : ''}! As a ${signName}, here is your cosmic guidance for today:\n\n${getMockHoroscopeReading(signName)}`;
+        setMessages(prev => [
+          ...prev,
+          {
+            id: Date.now().toString() + '-greeting',
+            role: 'assistant',
+            content: greeting,
+            timestamp: new Date(),
+          },
+        ]);
+        localStorage.setItem('astrobot-last-greeted', today);
+      }
+    }
+  }, [userProfile.zodiacSign, userProfile.name]);
 
   // Save messages to localStorage when they change
   useEffect(() => {
@@ -273,11 +297,20 @@ export const AstroBotProvider = ({ children }: { children: ReactNode }) => {
     extractUserInfo(content);
     
     try {
-      // Analyze user message to determine topic
-      const topic = analyzeMessageTopic(content);
+      // Get context from previous messages
+      const contextMessages = messages.slice(-5).map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }));
       
-      // Get response with context awareness
-      const responseContent = await getContextAwareBotResponse(content, messages, topic, userProfile);
+      // Add the current message
+      contextMessages.push({
+        role: 'user',
+        content: content
+      });
+      
+      // Get response from Gemini API
+      const responseContent = await getGeminiResponse(contextMessages);
       
       // Add bot response
       const botMessage: Message = {
@@ -318,7 +351,7 @@ export const AstroBotProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AstroBotContext.Provider value={{ messages, isLoading, sendMessage, clearMessages }}>
+    <AstroBotContext.Provider value={{ messages, isLoading, sendMessage, clearMessages, userProfile, setUserProfile }}>
       {children}
     </AstroBotContext.Provider>
   );
@@ -378,151 +411,8 @@ const getContextAwareBotResponse = async (
   topic: string,
   userProfile: UserProfile
 ): Promise<string> => {
-  // Simulate AI processing delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  // Add personalization based on user profile
-  const personalizedGreeting = userProfile.name ? `${userProfile.name}, ` : '';
-  
-  // Get the base response for the topic
-  let response = getMockBotResponse(message);
-  let personalized = false;
-  
-  // Use birth chart data if available for more personalized readings
-  if (userProfile.birthChart) {
-    const personalizedReading = getPersonalizedReading(userProfile.birthChart);
-    
-    if (message.toLowerCase().includes('birth chart') || message.toLowerCase().includes('natal chart')) {
-      response = `${personalizedGreeting}based on your birth chart, ${personalizedReading.summary} The most significant aspect in your chart suggests ${personalizedReading.aspects[0]}.`;
-      personalized = true;
-    }
-    
-    if (message.toLowerCase().includes('recommendation') || message.toLowerCase().includes('advice') || message.toLowerCase().includes('suggestion')) {
-      const randomRecommendation = personalizedReading.recommendations[Math.floor(Math.random() * personalizedReading.recommendations.length)];
-      response = `${personalizedGreeting}the stars suggest: ${randomRecommendation}. This aligns with your ${userProfile.birthChart.sun.sign} sun and ${userProfile.birthChart.moon.sign} moon energies.`;
-      personalized = true;
-    }
-  }
-  
-  // Special handling for specific query types
-  if (topic === 'astrology' && userProfile.zodiacSign) {
-    const zodiacData = getZodiacData(userProfile.zodiacSign);
-    if (zodiacData) {
-      if (message.toLowerCase().includes('compatibility') || message.toLowerCase().includes('compatible')) {
-        response = `${personalizedGreeting}as a ${zodiacData.name}, you are most compatible with ${zodiacData.compatibility.join(', ')}. ${zodiacData.compatibility[0]} and ${zodiacData.compatibility[1]} signs especially complement your ${zodiacData.element} energy, creating balanced and harmonious connections.`;
-        personalized = true;
-      } else if (message.toLowerCase().includes('strength') || message.toLowerCase().includes('weakness')) {
-        response = `${personalizedGreeting}your ${zodiacData.name} strengths include being ${zodiacData.strengths.join(', ')}. However, you may need to be mindful of tendencies toward being ${zodiacData.weaknesses.join(', ')}. Balancing these energies is key to your personal growth.`;
-        personalized = true;
-      } else if (message.toLowerCase().includes('element') || message.toLowerCase().includes('planet')) {
-        response = `${personalizedGreeting}your sign ${zodiacData.name} is a ${zodiacData.element} sign ruled by ${zodiacData.ruling_planet}. This gives you a special connection to ${zodiacData.element.toLowerCase()} energy, which manifests in your ${zodiacData.strengths[0].toLowerCase()} and ${zodiacData.strengths[1].toLowerCase()} nature.`;
-        personalized = true;
-      } else if (!personalized && (message.toLowerCase().includes('tell me about') || message.toLowerCase().includes('what does') || message.toLowerCase().includes('describe'))) {
-        response = `${personalizedGreeting}as a ${zodiacData.name}, ${zodiacData.description} Your ruling planet is ${zodiacData.ruling_planet}, and your element is ${zodiacData.element}.`;
-        personalized = true;
-      }
-    }
-  }
-  
-  if (topic === 'tarot') {
-    const cardMatch = message.match(/(?:card|about|meaning of|interpret) (?:the )?([\w\s]+)(?:card)?/i);
-    if (cardMatch && cardMatch[1]) {
-      const cardName = cardMatch[1].trim();
-      const card = getCardByName(cardName);
-      
-      if (card) {
-        response = `${personalizedGreeting}The ${card.name} card (${card.arcana} arcana) represents ${card.keywords.join(', ')}. ${card.description} When upright, it suggests ${card.upright.join(', ')}. When reversed, it can indicate ${card.reversed.join(', ')}.`;
-        personalized = true;
-      }
-    } else if (message.toLowerCase().includes('reading') || message.toLowerCase().includes('draw a card') || message.toLowerCase().includes('pull a card')) {
-      // Simple one-card drawing simulation
-      const randomIndex = Math.floor(Math.random() * 78) % 10; // Using only 10 cards we have
-      const randomCard = randomIndex < 5 ? randomIndex : 9 - randomIndex; // Maps 0-9 to 0-4,5-9
-      
-      const card = getCardByName(['The Fool', 'The Magician', 'The High Priestess', 'The Empress', 'The Emperor', 'The Star', 'The Moon', 'The Sun', 'Death', 'The Tower'][randomCard]);
-      
-      if (card) {
-        const isReversed = Math.random() > 0.7; // 30% chance of reversed
-        const position = isReversed ? 'reversed' : 'upright';
-        const meanings = isReversed ? card.reversed : card.upright;
-        
-        response = `${personalizedGreeting}I've drawn ${card.name} (${position}) for you. This ${card.arcana} arcana card represents ${card.keywords.join(', ')}. In the ${position} position, it suggests ${meanings.join(', ')}. ${card.description} Consider how this energy might be manifesting in your life right now.`;
-        personalized = true;
-      }
-    }
-  }
-  
-  // Enhanced context-aware responses for relationship/love topics
-  if (topic === 'love') {
-    // If we know relationship status
-    if (userProfile.relationshipStatus) {
-      if (userProfile.zodiacSign) {
-        const zodiacData = getZodiacData(userProfile.zodiacSign);
-        if (zodiacData) {
-          if (userProfile.relationshipStatus.includes('single')) {
-            response = `${personalizedGreeting}as a ${zodiacData.name} who is currently single, your ${zodiacData.element} energy attracts partners who appreciate your ${zodiacData.strengths[0].toLowerCase()} nature. The stars suggest focusing on self-development through ${zodiacData.element.toLowerCase()} practices before your next relationship. Your ${zodiacData.ruling_planet} ruler indicates that authentic connections will form when you embrace your ${zodiacData.traits[0].toLowerCase()} qualities.`;
-          } else if (userProfile.relationshipStatus.includes('married') || userProfile.relationshipStatus.includes('relationship')) {
-            response = `${personalizedGreeting}in your current relationship, your ${zodiacData.name} traits of being ${zodiacData.strengths[0].toLowerCase()} and ${zodiacData.strengths[1].toLowerCase()} can create harmony. Your partner likely appreciates your ${zodiacData.element.toLowerCase()} energy. To deepen your connection, embrace the balanced qualities of your ruling planet ${zodiacData.ruling_planet} by being more ${zodiacData.traits[2].toLowerCase()} in how you express love.`;
-          } else {
-            response = `${personalizedGreeting}in matters of the heart, your ${zodiacData.name} energy gives you a ${zodiacData.traits[0].toLowerCase()} and ${zodiacData.traits[1].toLowerCase()} approach to relationships. With ${zodiacData.ruling_planet} as your ruling planet, you tend to express love through ${zodiacData.element.toLowerCase()} qualities. Currently, the cosmos suggests focusing on authentic connections that honor your need for ${zodiacData.strengths[2].toLowerCase()}.`;
-          }
-          personalized = true;
-        }
-      }
-    } else if (userProfile.zodiacSign) {
-      const zodiacData = getZodiacData(userProfile.zodiacSign);
-      if (zodiacData) {
-        response = `${personalizedGreeting}in matters of the heart, your ${zodiacData.name} energy gives you a ${zodiacData.traits[0].toLowerCase()} and ${zodiacData.traits[1].toLowerCase()} approach to relationships. With ${zodiacData.ruling_planet} as your ruling planet, you tend to express love through ${zodiacData.element.toLowerCase()} qualities. Currently, the cosmos suggests focusing on authentic connections that honor your need for ${zodiacData.strengths[2].toLowerCase()}.`;
-        personalized = true;
-      }
-    }
-  }
-  
-  // Enhanced context-aware responses for career-related topics
-  if (topic === 'career') {
-    if (userProfile.zodiacSign) {
-      const zodiacData = getZodiacData(userProfile.zodiacSign);
-      if (zodiacData) {
-        if (userProfile.careerInterests && userProfile.careerInterests.length > 0) {
-          const careerField = userProfile.careerInterests[0];
-          response = `${personalizedGreeting}your work in ${careerField} aligns with your ${zodiacData.name} qualities of being ${zodiacData.strengths[0].toLowerCase()} and ${zodiacData.strengths[1].toLowerCase()}. Your ${zodiacData.element} nature thrives in environments that allow for ${zodiacData.traits[2].toLowerCase()} expression. With ${zodiacData.ruling_planet} as your planetary ruler, you'll find success by incorporating more ${zodiacData.element.toLowerCase()} approaches to your professional challenges.`;
-        } else {
-          response = `${personalizedGreeting}professionally, your ${zodiacData.name} energy excels in careers that value your ${zodiacData.strengths.join(' and ')} qualities. With a ${zodiacData.element} nature, you thrive in ${getElementalCareerAdvice(zodiacData.element)} environments. Your planetary ruler ${zodiacData.ruling_planet} suggests you'll find fulfillment in roles that allow you to express your natural ${zodiacData.traits[0].toLowerCase()} tendencies.`;
-        }
-        personalized = true;
-      }
-    }
-  }
-  
-  // Enhanced context-aware responses for mental wellness topics
-  if (topic === 'mental_wellness' || topic === 'health') {
-    if (userProfile.zodiacSign) {
-      const zodiacData = getZodiacData(userProfile.zodiacSign);
-      if (zodiacData) {
-        if (userProfile.mentalWellnessGoals && userProfile.mentalWellnessGoals.length > 0) {
-          const wellnessGoal = userProfile.mentalWellnessGoals[0];
-          response = `${personalizedGreeting}for managing ${wellnessGoal}, your ${zodiacData.name} energy responds well to ${getElementalWellnessAdvice(zodiacData.element)} practices. As a ${zodiacData.element} sign ruled by ${zodiacData.ruling_planet}, you might find relief through activities that engage your natural ${zodiacData.strengths[1].toLowerCase()} tendencies. Consider incorporating more ${zodiacData.element.toLowerCase()}-based practices into your daily routine.`;
-        } else {
-          response = `${personalizedGreeting}for mental wellness, your ${zodiacData.name} nature benefits from ${getElementalWellnessAdvice(zodiacData.element)} practices. Your ${zodiacData.element} energy responds well to ${zodiacData.element.toLowerCase()}-based healing modalities. With ${zodiacData.ruling_planet} as your planetary ruler, finding balance through ${zodiacData.traits[2].toLowerCase()} activities will particularly support your wellbeing.`;
-        }
-        personalized = true;
-      }
-    }
-  }
-  
-  // General personalization if no specific handling was triggered
-  if (!personalized && userProfile.name) {
-    response = `${personalizedGreeting}${response}`;
-  }
-  
-  // Use interests to personalize advice if appropriate
-  if (userProfile.interests && userProfile.interests.length > 0 && 
-    (topic === 'career' || topic === 'spirituality' || message.toLowerCase().includes('advice') || message.toLowerCase().includes('recommendation'))) {
-    const relevantInterests = userProfile.interests.slice(0, 2).join(' and ');
-    response += ` I notice your interest in ${relevantInterests} could provide unique insights on this journey.`;
-  }
-  
-  return response;
+  // This function is no longer needed as we're using Gemini API
+  return '';
 };
 
 // Helper function for career advice based on elemental energy

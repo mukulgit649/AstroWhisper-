@@ -1,0 +1,44 @@
+@keyframes card-flip {
+  0% {
+    transform: rotateY(0deg);
+  }
+  100% {
+    transform: rotateY(180deg);
+  }
+}
+
+@keyframes card-reveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) rotate(-5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes card-glow {
+  0% {
+    box-shadow: 0 0 20px 4px rgba(159, 68, 211, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 40px 8px rgba(159, 68, 211, 0.8);
+  }
+  100% {
+    box-shadow: 0 0 20px 4px rgba(159, 68, 211, 0.4);
+  }
+}
+
+.animate-card-flip {
+  animation: card-flip 0.8s cubic-bezier(0.4, 0.2, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.animate-card-reveal {
+  animation: card-reveal 1s ease-out;
+}
+
+.animate-card-glow {
+  animation: card-glow 2s infinite;
+} 
