@@ -12,6 +12,47 @@ export interface Message {
   timestamp: Date;
 }
 
+export interface UserProfile {
+  name?: string;
+  birthDate?: Date;
+  birthTime?: string;
+  birthPlace?: string;
+  zodiacSign?: string;
+  moonSign?: string;
+  risingSign?: string;
+  natalChart?: {
+    sun: string;
+    moon: string;
+    mercury: string;
+    venus: string;
+    mars: string;
+    jupiter: string;
+    saturn: string;
+    uranus: string;
+    neptune: string;
+    pluto: string;
+  };
+  emotionalState?: {
+    current: 'happy' | 'sad' | 'anxious' | 'excited' | 'neutral';
+    lastUpdated: Date;
+  };
+  preferences?: {
+    notifications: boolean;
+    dailyHoroscope: boolean;
+    weeklyInsights: boolean;
+    tarotStreak: boolean;
+  };
+  lastInteraction?: Date;
+  interactionStreak?: number;
+  interests?: string[];
+  careerInterests?: string[];
+  mentalWellnessGoals?: string[];
+  relationshipStatus?: string;
+  favoriteRituals?: string[];
+  goals?: string[];
+  lastCheckInMood?: 'happy' | 'sad' | 'anxious' | 'excited' | 'neutral';
+}
+
 interface AstroBotContextType {
   messages: Message[];
   isLoading: boolean;
@@ -19,19 +60,7 @@ interface AstroBotContextType {
   clearMessages: () => void;
   userProfile: UserProfile;
   setUserProfile: React.Dispatch<React.SetStateAction<UserProfile>>;
-}
-
-interface UserProfile {
-  name?: string;
-  zodiacSign?: string;
-  interests?: string[];
-  birthDate?: Date;
-  birthTime?: string;
-  birthPlace?: string;
-  birthChart?: PlanetaryPositions;
-  relationshipStatus?: string;
-  careerInterests?: string[];
-  mentalWellnessGoals?: string[];
+  updateUserMood: (mood: 'happy' | 'sad' | 'anxious' | 'excited' | 'neutral') => void;
 }
 
 const AstroBotContext = createContext<AstroBotContextType | undefined>(undefined);
@@ -293,8 +322,12 @@ export const AstroBotProvider = ({ children }: { children: ReactNode }) => {
     setMessages(prev => [...prev, userMessage]);
     setIsLoading(true);
     
-    // Extract user information from the message
-    extractUserInfo(content);
+    // Update user profile with last interaction
+    setUserProfile(prev => ({
+      ...prev,
+      lastInteraction: new Date(),
+      interactionStreak: (prev.interactionStreak || 0) + 1
+    }));
     
     try {
       // Get context from previous messages
@@ -308,9 +341,16 @@ export const AstroBotProvider = ({ children }: { children: ReactNode }) => {
         role: 'user',
         content: content
       });
+
+      // Calculate current transits
+      const currentTransits = await calculateCurrentTransits();
       
-      // Get response from Gemini API
-      const responseContent = await getGeminiResponse(contextMessages);
+      // Get response from Gemini API with context
+      const responseContent = await getGeminiResponse(contextMessages, {
+        userProfile,
+        currentTransits,
+        lastInteraction: userProfile.lastInteraction
+      });
       
       // Add bot response
       const botMessage: Message = {
@@ -321,6 +361,15 @@ export const AstroBotProvider = ({ children }: { children: ReactNode }) => {
       };
       
       setMessages(prev => [...prev, botMessage]);
+
+      // Save messages to localStorage
+      const updatedMessages = [...messages, userMessage, botMessage];
+      localStorage.setItem('astrobot-messages', JSON.stringify(updatedMessages));
+
+      // Check if we should send notifications
+      if (userProfile.preferences?.notifications) {
+        checkAndSendNotifications();
+      }
     } catch (error) {
       console.error('Error generating response:', error);
       
@@ -338,6 +387,52 @@ export const AstroBotProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Helper function to calculate current transits
+  const calculateCurrentTransits = async () => {
+    // This would be implemented with actual astrological calculations
+    // For now, return mock data
+    return [
+      { planet: 'Mercury', sign: 'Gemini', aspect: 'Conjunction' },
+      { planet: 'Venus', sign: 'Taurus', aspect: 'Trine' },
+      { planet: 'Mars', sign: 'Leo', aspect: 'Square' }
+    ];
+  };
+
+  // Helper function to check and send notifications
+  const checkAndSendNotifications = () => {
+    const now = new Date();
+    const lastInteraction = userProfile.lastInteraction;
+    
+    if (!lastInteraction) return;
+
+    const hoursSinceLastInteraction = (now.getTime() - lastInteraction.getTime()) / (1000 * 60 * 60);
+    
+    // Send daily horoscope if enabled and it's a new day
+    if (userProfile.preferences?.dailyHoroscope && hoursSinceLastInteraction >= 24) {
+      sendNotification("Your daily cosmic guidance is ready! 🌟");
+    }
+    
+    // Send weekly insights if enabled and it's been a week
+    if (userProfile.preferences?.weeklyInsights && hoursSinceLastInteraction >= 168) {
+      sendNotification("Your weekly astrological forecast awaits! 🌠");
+    }
+    
+    // Send tarot streak reminder if enabled
+    if (userProfile.preferences?.tarotStreak && hoursSinceLastInteraction >= 48) {
+      sendNotification("Don't break your tarot reading streak! 🔮");
+    }
+  };
+
+  // Helper function to send notifications
+  const sendNotification = (message: string) => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('AstroBot', {
+        body: message,
+        icon: '/assets/icons/astrobot-icon.png'
+      });
+    }
+  };
+
   const clearMessages = () => {
     setMessages([
       {
@@ -350,8 +445,17 @@ export const AstroBotProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem('astrobot-messages');
   };
 
+  // Add a function to update the user's mood
+  const updateUserMood = (mood: 'happy' | 'sad' | 'anxious' | 'excited' | 'neutral') => {
+    setUserProfile(prev => ({
+      ...prev,
+      emotionalState: { current: mood, lastUpdated: new Date() },
+      lastCheckInMood: mood
+    }));
+  };
+
   return (
-    <AstroBotContext.Provider value={{ messages, isLoading, sendMessage, clearMessages, userProfile, setUserProfile }}>
+    <AstroBotContext.Provider value={{ messages, isLoading, sendMessage, clearMessages, userProfile, setUserProfile, updateUserMood }}>
       {children}
     </AstroBotContext.Provider>
   );

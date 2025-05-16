@@ -20,6 +20,14 @@ interface ChatAreaProps {
   fadeInLoaded: string;
 }
 
+const MOODS = [
+  { label: '😊', value: 'happy' },
+  { label: '😢', value: 'sad' },
+  { label: '😰', value: 'anxious' },
+  { label: '🤩', value: 'excited' },
+  { label: '😐', value: 'neutral' },
+];
+
 const ChatArea = ({ 
   messages, 
   isLoading, 
@@ -31,7 +39,7 @@ const ChatArea = ({
   fadeInAnimation,
   fadeInLoaded
 }: ChatAreaProps) => {
-  const { userProfile, setUserProfile } = useAstroBot();
+  const { userProfile, setUserProfile, updateUserMood } = useAstroBot();
   const [selectedSign, setSelectedSign] = useState('');
 
   // Handler for sign selection
@@ -39,6 +47,11 @@ const ChatArea = ({
     const sign = e.target.value;
     setSelectedSign(sign);
     setUserProfile((prev: any) => ({ ...prev, zodiacSign: sign }));
+  };
+
+  // Mood selector handler
+  const handleMoodSelect = (mood: string) => {
+    updateUserMood(mood as any);
   };
 
   // Get daily guidance if sign is set
@@ -59,6 +72,24 @@ const ChatArea = ({
     <div className={`md:col-span-3 order-1 md:order-2 ${isLoaded ? fadeInLoaded : fadeInAnimation}`} style={{ transitionDelay: '0.4s' }}>
       <Card className="glass-card overflow-hidden h-[70vh] flex flex-col">
         <CardContent className="p-4 flex-grow overflow-hidden flex flex-col">
+          {/* Mood Selector */}
+          <div className="mb-2 flex items-center gap-2">
+            <span className="text-sm font-medium">Mood:</span>
+            {MOODS.map(mood => (
+              <button
+                key={mood.value}
+                className={`rounded-full px-2 py-1 text-xl border ${userProfile.emotionalState?.current === mood.value ? 'bg-purple-200 border-purple-400' : 'bg-white/10 border-white/20'} transition`}
+                onClick={() => handleMoodSelect(mood.value)}
+                aria-label={mood.value}
+                type="button"
+              >
+                {mood.label}
+              </button>
+            ))}
+            {userProfile.emotionalState?.current && (
+              <span className="ml-2 text-xs text-foreground/60">Current: {userProfile.emotionalState.current}</span>
+            )}
+          </div>
           {/* Only show chat history, quick replies, and input. No daily guidance card. */}
           <ChatHistory 
             messages={messages} 
